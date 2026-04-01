@@ -1,21 +1,27 @@
 # Some Transfer
 
-一个轻量、自托管的私有文件与文本中转站，适合在个人局域网、家庭服务器或 NAS 上快速投递临时内容。
+一个轻量、自托管的私有文件与文本中转站，适合在个人电脑、家庭服务器、局域网环境或 NAS 上快速投递临时内容。
 
-项目当前支持：
+它的目标很直接：用尽可能简单的方式，完成“发一段文字”或“传一个文件”这件事，同时保留基本可用的登录保护、图片预览和部署能力。
 
-- Pin 码登录
-- 文本内容投递
+## 功能亮点
+
+- Pin 码登录，无需注册
+- 文本快速投递
 - 文件上传、下载、删除
 - 图片文件在线预览
-- 文本内容保留基础换行与空格排版
-- 长文本行尾省略显示，复制时保留完整原文
-- Docker / Docker Compose 部署
+- 文本内容保留基础换行与空格
+- 超长文本行自动省略，保持卡片排版整洁
+- 复制文本时保留完整原文
+- 支持 Docker / Docker Compose 部署
+- 适配桌面与移动端浏览器
 
-## 功能截图
+## 适用场景
 
-- 登录页：`/public/login.html`
-- 主面板：`/public/index.html`
+- 在自己设备之间临时传文本
+- 在手机和电脑之间中转截图、文件、命令输出
+- 在家庭网络里搭一个简单可用的私有投递页
+- 在 NAS 或小主机上部署一个轻量的内部分享工具
 
 ## 技术栈
 
@@ -25,7 +31,7 @@
 - multer
 - 原生 HTML / CSS / JavaScript
 
-## 目录结构
+## 项目结构
 
 ```text
 some-transfer/
@@ -45,12 +51,84 @@ some-transfer/
 └── .env.example
 ```
 
+## 快速开始
+
+### 方式一：本地运行
+
+1. 安装依赖
+
+```bash
+npm install
+```
+
+2. 创建环境变量文件
+
+```bash
+cp .env.example .env
+```
+
+3. 至少修改以下配置
+
+- `APP_PIN`
+- `SESSION_SECRET`
+
+4. 启动服务
+
+```bash
+npm start
+```
+
+默认访问地址：
+
+```text
+http://localhost:3000
+```
+
+### 方式二：Docker Compose
+
+```bash
+docker compose up -d --build
+```
+
+如果你的环境仍使用旧版命令，也可以：
+
+```bash
+docker-compose up -d --build
+```
+
+默认端口映射：
+
+- 宿主机：`7300`
+- 容器：`3000`
+
+默认访问地址：
+
+```text
+http://localhost:7300
+```
+
+### 方式三：一键脚本
+
+```bash
+chmod +x build-and-run.sh
+./build-and-run.sh
+```
+
+脚本会自动完成：
+
+- 检查 `.env` 是否存在
+- 创建持久化目录
+- 构建 Docker 镜像
+- 启动容器
+
 ## 运行要求
+
+### 本地运行
 
 - Node.js 18 或更高版本
 - npm
 
-如果使用 Docker：
+### Docker 部署
 
 - Docker
 - Docker Compose 或 `docker compose`
@@ -74,112 +152,46 @@ some-transfer/
 | `SESSION_NAME` | 否 | Session Cookie 名称，默认 `some_transfer.sid` |
 | `NODE_ENV` | 否 | 运行环境，生产环境建议使用 `production` |
 
-可以直接基于示例文件创建本地配置：
+你可以直接基于示例文件生成本地配置：
 
 ```bash
 cp .env.example .env
 ```
 
-## 本地开发
+## 数据存储
 
-1. 安装依赖
-
-```bash
-npm install
-```
-
-2. 配置环境变量
-
-```bash
-cp .env.example .env
-```
-
-至少需要修改：
-
-- `APP_PIN`
-- `SESSION_SECRET`
-
-3. 启动服务
-
-```bash
-npm start
-```
-
-默认访问地址：
-
-```text
-http://localhost:3000
-```
-
-## Docker 部署
-
-### 方式一：使用 Docker Compose
-
-```bash
-docker compose up -d --build
-```
-
-如果环境里仍使用旧版命令，也可以：
-
-```bash
-docker-compose up -d --build
-```
-
-默认映射：
-
-- 宿主机 `7300`
-- 容器内 `3000`
-
-访问地址：
-
-```text
-http://localhost:7300
-```
-
-### 方式二：使用一键脚本
-
-```bash
-chmod +x build-and-run.sh
-./build-and-run.sh
-```
-
-脚本会自动：
-
-- 检查 `.env`
-- 创建持久化目录
-- 构建镜像
-- 启动容器
-
-## 数据存储说明
-
-- 文本和文件元数据保存在 `DATA_FILE`
+- 文本内容和文件元数据保存在 `DATA_FILE`
 - 上传的文件本体保存在 `UPLOAD_DIR`
-- 默认本地开发使用 `./data.json` 与 `./uploads`
-- Docker 部署时通过挂载卷保存到宿主机目录
+- 本地开发默认使用 `./data.json` 和 `./uploads`
+- Docker 部署通过挂载卷把数据保存在宿主机
 
-项目里的这些内容属于运行时数据，不建议提交到 Git 仓库：
+这些内容属于运行时数据，不建议提交到 Git 仓库：
 
 - `.env`
 - `data.json`
 - `uploads/`
 - `node_modules/`
 
-## 文本排版行为
+## 文本显示与排版说明
 
-文本投递区域支持保留基础排版：
+文本投递区域支持保留基础排版能力：
 
 - 保留换行
 - 保留基础空格
 - 提交时不会裁掉原文内容
-- 文本卡片中超长单行会以省略号显示，避免打乱布局
-- 点击“展开全文”后会显示更多行，但超长单行仍保持省略
-- 点击“复制文本”时复制的是完整原文
+- 超长单行会以省略号显示，避免撑坏布局
+- 点击“展开全文”会显示更多行数，但超长单行仍保持省略
+- 点击“复制文本”复制的是完整原文
 
-当前交互更适合“复制 -> 粘贴 -> 回车发送”的使用方式。
+当前输入体验更适合这种使用方式：
 
-## 安全特性
+```text
+复制 -> 粘贴 -> 回车发送
+```
 
-项目已经包含一些基础安全配置：
+## 安全说明
+
+项目目前内置了基础安全措施：
 
 - Session 登录态校验
 - 登录失败限流
@@ -188,7 +200,7 @@ chmod +x build-and-run.sh
 - `Content-Security-Policy`
 - 文件名规范化与路径保护
 
-如果对公网开放，建议额外配合：
+如果要对公网开放，建议额外配合：
 
 - HTTPS
 - 反向代理
@@ -196,9 +208,9 @@ chmod +x build-and-run.sh
 - 更长、更随机的 `APP_PIN`
 - 定期轮换 `SESSION_SECRET`
 
-## 常用操作
+## 常用命令
 
-启动：
+启动项目：
 
 ```bash
 npm start
@@ -222,16 +234,22 @@ docker compose logs -f
 docker compose down
 ```
 
-## 发布到 GitHub 前建议
+## 发布建议
 
-在推送到 GitHub 之前，建议确认：
+如果你准备把这个项目公开到 GitHub，建议在发布前确认：
 
 - `.env` 没有被提交
 - `data.json` 没有被提交
 - `uploads/` 没有被提交
-- 本地测试已经通过
-- README 中的部署说明与你的实际使用方式一致
+- README 的部署方式和你的实际使用方式一致
+- 已补充合适的开源许可证
 
 ## License
 
-如果你准备公开发布，建议补充一个 `LICENSE` 文件，例如 MIT License。
+当前仓库还没有附带 `LICENSE` 文件。
+
+如果你准备开源发布，推荐补一个常见许可证，例如：
+
+- MIT License
+- Apache-2.0
+- GPL-3.0
