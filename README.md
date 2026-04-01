@@ -31,6 +31,18 @@
 - multer
 - 原生 HTML / CSS / JavaScript
 
+## 界面预览
+
+### 登录界面
+
+![登录界面](./public/assets/login1.png)
+
+### 后台界面
+
+![后台界面 1](./public/assets/index1.png)
+
+![后台界面 2](./public/assets/index2.png)
+
 ## 项目结构
 
 ```text
