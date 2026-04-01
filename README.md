@@ -107,6 +107,55 @@ docker-compose up -d --build
 http://localhost:7300
 ```
 
+### 持久化部署说明
+
+如果你希望容器重启、升级或重建后仍然保留上传文件和文本记录，必须把数据目录挂载到宿主机。
+
+当前项目有两类需要持久化的内容：
+
+- 上传文件目录：`/app/uploads`
+- 数据文件目录：`/app/data`
+
+仓库内置的 [docker-compose.yml](/Users/reputati0n/Downloads/some-transfer/docker-compose.yml) 已经包含了持久化挂载：
+
+```yaml
+volumes:
+  - ${APPDATA_ROOT:-/mnt/user/appdata/some-transfer}/uploads:/app/uploads
+  - ${APPDATA_ROOT:-/mnt/user/appdata/some-transfer}/data:/app/data
+```
+
+这意味着：
+
+- 容器里的 `/app/uploads` 会映射到宿主机的 `uploads` 目录
+- 容器里的 `/app/data` 会映射到宿主机的 `data` 目录
+- 只要宿主机目录不删，容器重建后数据仍会保留
+
+例如在 NAS、家庭服务器或 Linux 主机上，你可以把 `APPDATA_ROOT` 配成：
+
+```bash
+APPDATA_ROOT=/mnt/user/appdata/some-transfer
+```
+
+部署完成后，实际持久化数据通常会落在：
+
+```text
+/mnt/user/appdata/some-transfer/uploads
+/mnt/user/appdata/some-transfer/data
+```
+
+如果你不使用仓库自带的 Compose 文件，也请确保至少挂载下面两个路径：
+
+```text
+宿主机目录 -> /app/uploads
+宿主机目录 -> /app/data
+```
+
+否则会出现这些情况：
+
+- 容器删除后，上传文件丢失
+- 容器重建后，文本记录丢失
+- 镜像更新后，历史数据不可恢复
+
 ### 方式三：一键脚本
 
 ```bash
@@ -234,22 +283,6 @@ docker compose logs -f
 docker compose down
 ```
 
-## 发布建议
-
-如果你准备把这个项目公开到 GitHub，建议在发布前确认：
-
-- `.env` 没有被提交
-- `data.json` 没有被提交
-- `uploads/` 没有被提交
-- README 的部署方式和你的实际使用方式一致
-- 已补充合适的开源许可证
-
 ## License
 
-当前仓库还没有附带 `LICENSE` 文件。
-
-如果你准备开源发布，推荐补一个常见许可证，例如：
-
-- MIT License
-- Apache-2.0
-- GPL-3.0
+本项目使用 [MIT License](./LICENSE)。
