@@ -1,0 +1,10 @@
+node_modules
+uploads
+data
+data.json
+.git
+.gitignore
+README.md
+.env
+.env.*
+.DS_Store

@@ -1,0 +1,46 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="88" y1="72" x2="424" y2="440" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FFF8F0"/>
+      <stop offset="1" stop-color="#F1E7DA"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="170" y1="170" x2="342" y2="342" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#D87C45"/>
+      <stop offset="1" stop-color="#A84C1B"/>
+    </linearGradient>
+    <linearGradient id="cool" x1="160" y1="326" x2="360" y2="190" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#2C6BA8"/>
+      <stop offset="1" stop-color="#4B8FD1"/>
+    </linearGradient>
+    <filter id="shadow" x="36" y="40" width="440" height="440" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feFlood flood-opacity="0" result="BackgroundImageFix"/>
+      <feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/>
+      <feOffset dy="20"/>
+      <feGaussianBlur stdDeviation="22"/>
+      <feColorMatrix type="matrix" values="0 0 0 0 0.36 0 0 0 0 0.25 0 0 0 0 0.14 0 0 0 0.2 0"/>
+      <feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_1_1"/>
+      <feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_1_1" result="shape"/>
+    </filter>
+  </defs>
+
+  <g filter="url(#shadow)">
+    <rect x="80" y="84" width="352" height="352" rx="88" fill="url(#bg)"/>
+    <rect x="98" y="102" width="316" height="316" rx="70" stroke="white" stroke-opacity="0.55" stroke-width="2"/>
+
+    <path d="M181 156C181 147.163 188.163 140 197 140H273.373C277.617 140 281.687 141.686 284.686 144.686L323.314 183.314C326.314 186.313 328 190.383 328 194.627V281C328 289.837 320.837 297 312 297H197C188.163 297 181 289.837 181 281V156Z" fill="white" fill-opacity="0.72"/>
+    <path d="M280 140V180C280 188.837 287.163 196 296 196H328" fill="#F6E1D3"/>
+    <path d="M280 140V180C280 188.837 287.163 196 296 196H328" stroke="#E3C0A9" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+
+    <rect x="140" y="228" width="232" height="108" rx="54" fill="#FFFDF9"/>
+    <rect x="140" y="228" width="232" height="108" rx="54" stroke="#E8DDD0" stroke-width="8"/>
+
+    <path d="M230 270H314" stroke="url(#accent)" stroke-width="22" stroke-linecap="round"/>
+    <path d="M282 240L314 270L282 300" stroke="url(#accent)" stroke-width="22" stroke-linecap="round" stroke-linejoin="round"/>
+
+    <path d="M282 294H198" stroke="url(#cool)" stroke-width="22" stroke-linecap="round"/>
+    <path d="M230 324L198 294L230 264" stroke="url(#cool)" stroke-width="22" stroke-linecap="round" stroke-linejoin="round"/>
+
+    <circle cx="156" cy="158" r="20" fill="#F1D8C6"/>
+    <circle cx="156" cy="158" r="8" fill="#D87C45"/>
+  </g>
+</svg>

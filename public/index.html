@@ -1,0 +1,1246 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>文件分享系统</title>
+  <link rel="icon" type="image/svg+xml" href="/assets/app-icon.svg">
+  <link rel="apple-touch-icon" href="/assets/app-icon.svg">
+  <style>
+    :root {
+      --bg: #f4efe8;
+      --panel: rgba(255, 251, 245, 0.84);
+      --panel-strong: rgba(255, 255, 255, 0.9);
+      --line: rgba(102, 83, 57, 0.12);
+      --text: #1d1b18;
+      --muted: #6f675e;
+      --accent: #cc6f39;
+      --accent-deep: #a74f1d;
+      --danger: #c94635;
+      --danger-deep: #9d301f;
+      --blue: #2d78bf;
+      --shadow-lg: 0 34px 90px rgba(60, 41, 24, 0.14);
+      --shadow-md: 0 18px 44px rgba(60, 41, 24, 0.1);
+      --radius-xl: 28px;
+      --radius-lg: 22px;
+      --radius-md: 18px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Avenir Next", "PingFang SC", "Noto Sans SC", sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at top left, rgba(212, 133, 87, 0.22), transparent 24%),
+        radial-gradient(circle at bottom right, rgba(94, 122, 160, 0.14), transparent 28%),
+        linear-gradient(145deg, #f7f1e8 0%, #eee7de 48%, #ebe6de 100%);
+      padding: 24px;
+    }
+
+    .container {
+      max-width: 1380px;
+      margin: 0 auto;
+    }
+
+    .hero {
+      position: relative;
+      display: grid;
+      grid-template-columns: minmax(0, 1.15fr) minmax(320px, 0.85fr);
+      gap: 22px;
+      margin-bottom: 24px;
+    }
+
+    .hero-card,
+    .status-card,
+    .composer,
+    .item {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      backdrop-filter: blur(18px);
+      box-shadow: var(--shadow-lg);
+    }
+
+    .hero-card,
+    .status-card,
+    .composer {
+      border-radius: var(--radius-xl);
+    }
+
+    .hero-card {
+      padding: 34px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero-card::after,
+    .status-card::after {
+      content: "";
+      position: absolute;
+      width: 260px;
+      height: 260px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(204, 111, 57, 0.14), transparent 70%);
+      pointer-events: none;
+    }
+
+    .hero-card::after {
+      right: -60px;
+      top: -70px;
+    }
+
+    .status-card::after {
+      left: -90px;
+      bottom: -120px;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 14px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.68);
+      border: 1px solid rgba(102, 83, 57, 0.1);
+      color: var(--muted);
+      font-size: 13px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .eyebrow::before {
+      content: "";
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 0 0 0 6px rgba(204, 111, 57, 0.12);
+    }
+
+    .hero-brand {
+      margin-bottom: 20px;
+    }
+
+    .hero h1 {
+      margin: 0 0 14px;
+      font-size: clamp(34px, 5vw, 64px);
+      line-height: 0.98;
+      letter-spacing: -0.05em;
+    }
+
+    .hero p {
+      margin: 0;
+      max-width: 42rem;
+      color: var(--muted);
+      font-size: 17px;
+      line-height: 1.8;
+    }
+
+    .hero-actions {
+      margin-top: 28px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 16px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.72);
+      border: 1px solid rgba(102, 83, 57, 0.08);
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .status-card {
+      position: relative;
+      padding: 28px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      min-height: 100%;
+    }
+
+    .status-card h2 {
+      margin: 0 0 12px;
+      font-size: 28px;
+      letter-spacing: -0.04em;
+    }
+
+    .status-card p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.75;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+      margin: 24px 0 18px;
+    }
+
+    .stat {
+      padding: 16px;
+      border-radius: 20px;
+      background: rgba(255, 255, 255, 0.72);
+      border: 1px solid rgba(102, 83, 57, 0.08);
+    }
+
+    .stat strong {
+      display: block;
+      font-size: 28px;
+      letter-spacing: -0.05em;
+      margin-bottom: 4px;
+    }
+
+    .stat span {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .logout-btn,
+    .upload-label,
+    .composer-submit,
+    .file-download,
+    .copy-btn,
+    .delete-btn,
+    .expand-btn {
+      border: none;
+      cursor: pointer;
+      transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease, background 0.2s ease;
+      font-family: inherit;
+    }
+
+    .logout-btn {
+      align-self: flex-start;
+      padding: 12px 16px;
+      border-radius: 16px;
+      color: white;
+      background: linear-gradient(135deg, var(--danger) 0%, var(--danger-deep) 100%);
+      box-shadow: 0 18px 30px rgba(157, 48, 31, 0.2);
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .logout-btn:hover,
+    .upload-label:hover,
+    .composer-submit:hover,
+    .file-download:hover,
+    .copy-btn:hover,
+    .delete-btn:hover {
+      transform: translateY(-2px);
+    }
+
+    .composer {
+      padding: 22px;
+      margin-bottom: 22px;
+    }
+
+    .composer-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      margin-bottom: 16px;
+    }
+
+    .composer-top h2 {
+      margin: 0;
+      font-size: 24px;
+      letter-spacing: -0.04em;
+    }
+
+    .composer-top p {
+      margin: 6px 0 0;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .composer-form {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 12px;
+      align-items: start;
+    }
+
+    .composer-actions {
+      display: grid;
+      gap: 12px;
+      align-self: stretch;
+    }
+
+    .text-input {
+      width: 100%;
+      height: 136px;
+      padding: 16px 18px;
+      border-radius: 20px;
+      border: 1px solid rgba(102, 83, 57, 0.12);
+      background: rgba(255, 255, 255, 0.84);
+      color: var(--text);
+      font-size: 16px;
+      line-height: 1.8;
+      resize: none;
+      tab-size: 2;
+      outline: none;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+    }
+
+    .text-input:focus {
+      border-color: rgba(204, 111, 57, 0.72);
+      box-shadow: 0 0 0 5px rgba(204, 111, 57, 0.12);
+      transform: translateY(-1px);
+    }
+
+    .file-upload input[type="file"] {
+      display: none;
+    }
+
+    .upload-label,
+    .composer-submit,
+    .file-download {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      min-height: 58px;
+      align-self: start;
+      padding: 0 20px;
+      border-radius: 20px;
+      color: white;
+      text-decoration: none;
+      font-size: 15px;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    .upload-label {
+      background: linear-gradient(135deg, #275f93 0%, #2d78bf 100%);
+      box-shadow: 0 18px 30px rgba(45, 120, 191, 0.2);
+    }
+
+    .composer-submit {
+      background: linear-gradient(135deg, var(--accent) 0%, var(--accent-deep) 100%);
+      box-shadow: 0 18px 32px rgba(167, 79, 29, 0.2);
+    }
+
+    .composer-submit:disabled,
+    .upload-label.disabled {
+      opacity: 0.7;
+      pointer-events: none;
+    }
+
+    .selected-file {
+      margin-top: 12px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .error-message {
+      margin-bottom: 18px;
+      padding: 14px 16px;
+      border-radius: 18px;
+      background: rgba(201, 70, 53, 0.12);
+      border: 1px solid rgba(201, 70, 53, 0.16);
+      color: #8f2619;
+      display: none;
+    }
+
+    .toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .toolbar h3 {
+      margin: 0;
+      font-size: 24px;
+      letter-spacing: -0.04em;
+    }
+
+    .toolbar span {
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .content-grid {
+      position: relative;
+      min-height: 120px;
+    }
+
+    .item {
+      position: relative;
+      padding: 22px;
+      border-radius: 24px;
+      box-shadow: var(--shadow-md);
+      animation: cardIn 0.35s ease both;
+      will-change: top, left;
+    }
+
+    @keyframes cardIn {
+      from {
+        opacity: 0;
+        transform: translateY(12px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .item::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.18), transparent);
+      pointer-events: none;
+    }
+
+    .item-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 16px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.7);
+      color: var(--muted);
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .item-text {
+      display: grid;
+      gap: 6px;
+      line-height: 1.8;
+      font-size: 15px;
+      padding-right: 6px;
+      max-height: calc(1.8em * 10 + 54px);
+      overflow: hidden;
+    }
+
+    .item-text.expanded {
+      max-height: none;
+      overflow: visible;
+    }
+
+    .item-text-line {
+      white-space: pre;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .item-text.expanded .item-text-line {
+      white-space: pre;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .item-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    .expand-btn,
+    .copy-btn,
+    .delete-btn {
+      padding: 10px 14px;
+      border-radius: 14px;
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .copy-btn {
+      background: rgba(45, 120, 191, 0.12);
+      color: var(--blue);
+    }
+
+    .copy-btn.copied {
+      background: rgba(72, 160, 106, 0.15);
+      color: #2f7c4b;
+    }
+
+    .expand-btn {
+      display: none;
+      background: rgba(204, 111, 57, 0.12);
+      color: var(--accent-deep);
+    }
+
+    .expand-btn.visible {
+      display: inline-flex;
+      align-items: center;
+    }
+
+    .delete-btn {
+      position: absolute;
+      top: 18px;
+      right: 18px;
+      background: rgba(201, 70, 53, 0.12);
+      color: var(--danger);
+    }
+
+    .item-file {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .preview-wrap {
+      border-radius: 20px;
+      overflow: hidden;
+      background: rgba(255, 255, 255, 0.64);
+      border: 1px solid rgba(102, 83, 57, 0.08);
+      min-height: 220px;
+      display: grid;
+      place-items: center;
+    }
+
+    .file-preview {
+      width: 100%;
+      max-height: 300px;
+      object-fit: contain;
+      display: block;
+      cursor: zoom-in;
+    }
+
+    .lightbox {
+      position: fixed;
+      inset: 0;
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 28px;
+      background: rgba(29, 27, 24, 0.74);
+      backdrop-filter: blur(12px);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.22s ease;
+    }
+
+    .lightbox.visible {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .lightbox-panel {
+      position: relative;
+      width: min(100%, 1120px);
+      max-height: 100%;
+      padding: 18px 18px 14px;
+      border-radius: 28px;
+      background: rgba(255, 251, 245, 0.96);
+      border: 1px solid rgba(255, 255, 255, 0.36);
+      box-shadow: 0 34px 90px rgba(0, 0, 0, 0.22);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      transform: translateY(10px) scale(0.98);
+      transition: transform 0.22s ease;
+    }
+
+    .lightbox.visible .lightbox-panel {
+      transform: translateY(0) scale(1);
+    }
+
+    .lightbox-close {
+      position: absolute;
+      top: 14px;
+      right: 14px;
+      width: 42px;
+      height: 42px;
+      border: none;
+      border-radius: 999px;
+      background: rgba(29, 27, 24, 0.08);
+      color: var(--text);
+      font-size: 24px;
+      line-height: 1;
+      cursor: pointer;
+      transition: transform 0.2s ease, background 0.2s ease;
+    }
+
+    .lightbox-close:hover {
+      transform: scale(1.04);
+      background: rgba(29, 27, 24, 0.14);
+    }
+
+    .lightbox-figure {
+      margin: 0;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .lightbox-image-wrap {
+      min-height: 0;
+      max-height: calc(100vh - 170px);
+      border-radius: 22px;
+      overflow: hidden;
+      background:
+        linear-gradient(135deg, rgba(247, 241, 232, 0.96), rgba(236, 229, 221, 0.92));
+      display: grid;
+      place-items: center;
+    }
+
+    .lightbox-image {
+      max-width: 100%;
+      max-height: calc(100vh - 170px);
+      object-fit: contain;
+      display: block;
+    }
+
+    .lightbox-caption {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.6;
+      padding: 0 4px;
+    }
+
+    .lightbox-caption strong {
+      color: var(--text);
+      display: block;
+      font-size: 16px;
+      word-break: break-word;
+    }
+
+    .lightbox-hint {
+      white-space: nowrap;
+    }
+
+    .file-meta {
+      display: grid;
+      gap: 8px;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.7;
+    }
+
+    .file-meta strong {
+      color: var(--text);
+      font-size: 16px;
+      word-break: break-word;
+    }
+
+    .file-download {
+      width: fit-content;
+      background: linear-gradient(135deg, #275f93 0%, #2d78bf 100%);
+      box-shadow: 0 18px 30px rgba(45, 120, 191, 0.2);
+    }
+
+    .item-time {
+      margin-top: 16px;
+      color: var(--muted);
+      font-size: 12px;
+      text-align: right;
+    }
+
+    .empty-state {
+      display: block;
+      width: 100%;
+      padding: 60px 28px;
+      text-align: center;
+      border-radius: 28px;
+      background: rgba(255, 255, 255, 0.66);
+      border: 1px dashed rgba(102, 83, 57, 0.16);
+      color: var(--muted);
+      line-height: 1.8;
+    }
+
+    @media (max-width: 1120px) {
+      .hero {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 860px) {
+      body {
+        padding: 16px;
+      }
+
+      .composer-form {
+        grid-template-columns: 1fr;
+      }
+
+      .upload-label,
+      .composer-submit {
+        width: 100%;
+      }
+
+      .stats {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .hero-card,
+      .status-card,
+      .composer,
+      .item {
+        border-radius: 22px;
+      }
+
+      .hero-card,
+      .status-card,
+      .composer,
+      .item {
+        padding-left: 18px;
+        padding-right: 18px;
+      }
+
+      .hero-card {
+        padding-top: 24px;
+        padding-bottom: 24px;
+      }
+
+      .status-card,
+      .composer,
+      .item {
+        padding-top: 20px;
+        padding-bottom: 20px;
+      }
+
+      .toolbar {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .item-actions {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .copy-btn,
+      .expand-btn {
+        justify-content: center;
+      }
+
+      .lightbox {
+        padding: 16px;
+      }
+
+      .lightbox-panel {
+        width: 100%;
+        padding: 14px 14px 12px;
+        border-radius: 22px;
+      }
+
+      .lightbox-image-wrap,
+      .lightbox-image {
+        max-height: calc(100vh - 190px);
+      }
+
+      .lightbox-caption {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .lightbox-hint {
+        white-space: normal;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <section class="hero">
+      <div class="hero-card">
+        <div class="hero-brand">
+          <div class="eyebrow">Workspace</div>
+        </div>
+        <h1>把临时传输体验整理成一个更清晰的工作台</h1>
+        <p>
+          你依然可以像以前一样发送文本、上传文件、查看图片预览和下载内容。
+          这次更新主要聚焦在布局层次、响应式体验和卡片可读性，让它在手机和桌面上都更顺手。
+        </p>
+        <div class="hero-actions">
+          <div class="pill">文本快速投递</div>
+          <div class="pill">图片预览</div>
+          <div class="pill">安全下载</div>
+          <div class="pill">响应式布局</div>
+        </div>
+      </div>
+
+      <aside class="status-card">
+        <div>
+          <h2>当前空间</h2>
+          <p>上传文件、投递文本、删除历史内容，所有原有核心能力都保留在同一页面中。</p>
+          <div class="stats">
+            <div class="stat">
+              <strong id="stat-total">0</strong>
+              <span>总项目</span>
+            </div>
+            <div class="stat">
+              <strong id="stat-text">0</strong>
+              <span>文本条目</span>
+            </div>
+            <div class="stat">
+              <strong id="stat-file">0</strong>
+              <span>文件数量</span>
+            </div>
+          </div>
+        </div>
+        <button class="logout-btn" onclick="logout()">退出登录</button>
+      </aside>
+    </section>
+
+    <div class="error-message" id="error-message"></div>
+
+    <section class="composer">
+      <div class="composer-top">
+        <div>
+          <h2>新建内容</h2>
+          <p>支持保留粘贴内容的换行和空格，粘贴后直接按回车即可发送。</p>
+        </div>
+      </div>
+
+      <div class="composer-form">
+        <textarea class="text-input" placeholder="粘贴文本内容，换行和空格会尽量按原样保留"></textarea>
+        <div class="composer-actions">
+          <div class="file-upload">
+            <input type="file" id="file-input">
+            <label class="upload-label" for="file-input" id="upload-label">选择文件</label>
+          </div>
+          <button class="composer-submit" id="submit-text-btn" type="button">发送文本</button>
+        </div>
+      </div>
+      <div class="selected-file" id="selected-file"></div>
+    </section>
+
+    <div class="toolbar">
+      <div>
+        <h3>内容列表</h3>
+        <span id="toolbar-summary">正在加载内容...</span>
+      </div>
+    </div>
+
+    <div class="content-grid" id="content-grid"></div>
+  </div>
+
+  <div class="lightbox" id="lightbox" aria-hidden="true">
+    <div class="lightbox-panel" role="dialog" aria-modal="true" aria-labelledby="lightbox-title">
+      <button class="lightbox-close" id="lightbox-close" type="button" aria-label="关闭预览">&times;</button>
+      <figure class="lightbox-figure">
+        <div class="lightbox-image-wrap">
+          <img class="lightbox-image" id="lightbox-image" alt="">
+        </div>
+        <figcaption class="lightbox-caption">
+          <div>
+            <strong id="lightbox-title"></strong>
+            <span id="lightbox-size"></span>
+          </div>
+          <span class="lightbox-hint">点击空白处或按 Esc 关闭</span>
+        </figcaption>
+      </figure>
+    </div>
+  </div>
+
+  <script>
+    const textInput = document.querySelector('.text-input');
+    const fileInput = document.getElementById('file-input');
+    const uploadLabel = document.getElementById('upload-label');
+    const submitTextBtn = document.getElementById('submit-text-btn');
+    const selectedFile = document.getElementById('selected-file');
+    const contentGrid = document.getElementById('content-grid');
+    const errorMessage = document.getElementById('error-message');
+    const toolbarSummary = document.getElementById('toolbar-summary');
+    const statTotal = document.getElementById('stat-total');
+    const statText = document.getElementById('stat-text');
+    const statFile = document.getElementById('stat-file');
+    const lightbox = document.getElementById('lightbox');
+    const lightboxImage = document.getElementById('lightbox-image');
+    const lightboxTitle = document.getElementById('lightbox-title');
+    const lightboxSize = document.getElementById('lightbox-size');
+    const lightboxClose = document.getElementById('lightbox-close');
+    const masonryGap = 18;
+    const masonryMinWidth = 320;
+
+    function showError(message) {
+      errorMessage.textContent = message;
+      errorMessage.style.display = 'block';
+      clearTimeout(showError.timer);
+      showError.timer = setTimeout(() => {
+        errorMessage.style.display = 'none';
+      }, 5000);
+    }
+
+    async function handleResponse(response) {
+      if (response.status === 401) {
+        window.location.href = '/';
+        return null;
+      }
+      if (!response.ok) {
+        const data = await response.json().catch(() => ({ error: '请求失败' }));
+        throw new Error(data.error || '请求失败');
+      }
+      return response.json();
+    }
+
+    function updateStats(items) {
+      const textCount = items.filter(item => item.type === 'text').length;
+      const fileCount = items.filter(item => item.type === 'file').length;
+
+      statTotal.textContent = String(items.length);
+      statText.textContent = String(textCount);
+      statFile.textContent = String(fileCount);
+
+      if (items.length === 0) {
+        toolbarSummary.textContent = '这里还是空的，发一条文本或上传一个文件试试。';
+      } else {
+        toolbarSummary.textContent = `共 ${items.length} 条内容，其中 ${textCount} 条文本、${fileCount} 个文件。`;
+      }
+    }
+
+    async function logout() {
+      try {
+        const response = await fetch('/logout', { method: 'POST' });
+        if (response.ok) {
+          window.location.href = '/';
+        }
+      } catch (error) {
+        showError('退出登录失败');
+      }
+    }
+
+    async function loadItems() {
+      try {
+        const response = await fetch('/api/items');
+        const data = await handleResponse(response);
+        if (data) {
+          contentGrid.innerHTML = '';
+          updateStats(data);
+
+          if (data.length === 0) {
+            contentGrid.innerHTML = '<div class="empty-state">暂无内容。<br>你可以先发送一段文本，或者上传一个文件作为起点。</div>';
+          } else {
+            data.slice().reverse().forEach(item => {
+              renderItem(item);
+            });
+          }
+
+          scheduleLayout();
+        }
+      } catch (error) {
+        showError('加载内容失败: ' + error.message);
+      }
+    }
+
+    function isImageFile(filename) {
+      const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.bmp', '.webp', '.svg'];
+      const ext = filename.toLowerCase().substring(filename.lastIndexOf('.'));
+      return imageExtensions.includes(ext);
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    function formatSize(bytes) {
+      if (bytes < 1024) return bytes + ' B';
+      if (bytes < 1048576) return (bytes / 1024).toFixed(2) + ' KB';
+      return (bytes / 1048576).toFixed(2) + ' MB';
+    }
+
+    function openLightbox({ src, filename, size }) {
+      lightboxImage.src = src;
+      lightboxImage.alt = filename;
+      lightboxTitle.textContent = filename;
+      lightboxSize.textContent = `大小: ${formatSize(size)}`;
+      lightbox.classList.add('visible');
+      lightbox.setAttribute('aria-hidden', 'false');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeLightbox() {
+      lightbox.classList.remove('visible');
+      lightbox.setAttribute('aria-hidden', 'true');
+      lightboxImage.src = '';
+      lightboxImage.alt = '';
+      document.body.style.overflow = '';
+    }
+
+    function layoutItems() {
+      const items = Array.from(contentGrid.querySelectorAll('.item'));
+      const emptyState = contentGrid.querySelector('.empty-state');
+
+      if (emptyState) {
+        contentGrid.style.height = 'auto';
+        return;
+      }
+
+      if (items.length === 0) {
+        contentGrid.style.height = '0px';
+        return;
+      }
+
+      const availableWidth = contentGrid.clientWidth;
+      const columnCount = Math.max(1, Math.floor((availableWidth + masonryGap) / (masonryMinWidth + masonryGap)));
+      const columnWidth = (availableWidth - (columnCount - 1) * masonryGap) / columnCount;
+      const columnHeights = new Array(columnCount).fill(0);
+
+      items.forEach((item) => {
+        item.style.position = 'absolute';
+        item.style.width = `${columnWidth}px`;
+
+        const shortestColumn = columnHeights.indexOf(Math.min(...columnHeights));
+        const x = shortestColumn * (columnWidth + masonryGap);
+        const y = columnHeights[shortestColumn];
+
+        item.style.left = `${x}px`;
+        item.style.top = `${y}px`;
+        columnHeights[shortestColumn] += item.offsetHeight + masonryGap;
+      });
+
+      contentGrid.style.height = `${Math.max(...columnHeights) - masonryGap}px`;
+    }
+
+    let layoutFrame = null;
+    function scheduleLayout() {
+      if (layoutFrame) {
+        cancelAnimationFrame(layoutFrame);
+      }
+      layoutFrame = requestAnimationFrame(layoutItems);
+    }
+
+    async function copyText(text, btn) {
+      try {
+        await navigator.clipboard.writeText(text);
+        btn.textContent = '已复制';
+        btn.classList.add('copied');
+        setTimeout(() => {
+          btn.textContent = '复制文本';
+          btn.classList.remove('copied');
+        }, 2000);
+      } catch (error) {
+        showError('复制失败');
+      }
+    }
+
+    function renderItem(item) {
+      const itemElement = document.createElement('div');
+      itemElement.className = 'item';
+
+      const deleteBtn = document.createElement('button');
+      deleteBtn.className = 'delete-btn';
+      deleteBtn.textContent = '删除';
+      deleteBtn.onclick = () => deleteItem(item.id);
+      itemElement.appendChild(deleteBtn);
+
+      const badge = document.createElement('div');
+      badge.className = 'item-badge';
+      badge.textContent = item.type === 'text' ? 'Text Snippet' : 'File Asset';
+      itemElement.appendChild(badge);
+
+      if (item.type === 'text') {
+        const textContent = renderTextContent(item.content);
+        itemElement.appendChild(textContent);
+
+        const actions = document.createElement('div');
+        actions.className = 'item-actions';
+
+        const copyBtn = document.createElement('button');
+        copyBtn.className = 'copy-btn';
+        copyBtn.textContent = '复制文本';
+        copyBtn.onclick = () => copyText(item.content, copyBtn);
+        actions.appendChild(copyBtn);
+
+        const expandBtn = document.createElement('button');
+        expandBtn.className = 'expand-btn';
+        expandBtn.textContent = '展开全文';
+        expandBtn.onclick = () => {
+          textContent.classList.toggle('expanded');
+          expandBtn.textContent = textContent.classList.contains('expanded') ? '收起内容' : '展开全文';
+          scheduleLayout();
+        };
+        actions.appendChild(expandBtn);
+        itemElement.appendChild(actions);
+
+        requestAnimationFrame(() => {
+          if (textContent.scrollHeight > textContent.clientHeight + 4) {
+            expandBtn.classList.add('visible');
+            scheduleLayout();
+          }
+        });
+      } else if (item.type === 'file') {
+        const fileContent = document.createElement('div');
+        fileContent.className = 'item-file';
+
+        if (isImageFile(item.filename)) {
+          const previewWrap = document.createElement('div');
+          previewWrap.className = 'preview-wrap';
+
+          const img = document.createElement('img');
+          img.className = 'file-preview';
+          img.src = `/preview/${item.filepath}`;
+          img.alt = item.filename;
+          img.onclick = () => openLightbox({
+            src: `/preview/${item.filepath}`,
+            filename: item.filename,
+            size: item.size
+          });
+          img.addEventListener('load', scheduleLayout);
+          img.addEventListener('error', scheduleLayout);
+          previewWrap.appendChild(img);
+          fileContent.appendChild(previewWrap);
+        }
+
+        const fileMeta = document.createElement('div');
+        fileMeta.className = 'file-meta';
+        fileMeta.innerHTML = `
+          <strong>${escapeHtml(item.filename)}</strong>
+          <div>大小: ${formatSize(item.size)}</div>
+        `;
+        fileContent.appendChild(fileMeta);
+
+        const downloadLink = document.createElement('a');
+        downloadLink.href = `/download/${item.filepath}`;
+        downloadLink.className = 'file-download';
+        downloadLink.download = item.filename;
+        downloadLink.textContent = '下载文件';
+        fileContent.appendChild(downloadLink);
+
+        itemElement.appendChild(fileContent);
+      }
+
+      const timeElement = document.createElement('div');
+      timeElement.className = 'item-time';
+      timeElement.textContent = new Date(item.timestamp).toLocaleString();
+      itemElement.appendChild(timeElement);
+
+      contentGrid.appendChild(itemElement);
+    }
+
+    function renderTextContent(text) {
+      const textContent = document.createElement('div');
+      textContent.className = 'item-text';
+
+      text.split('\n').forEach((line) => {
+        const lineElement = document.createElement('div');
+        lineElement.className = 'item-text-line';
+        lineElement.textContent = line || ' ';
+        textContent.appendChild(lineElement);
+      });
+
+      return textContent;
+    }
+
+    async function submitText() {
+      const text = textInput.value;
+      if (!text.trim()) {
+        showError('请输入文本内容后再发送');
+        return;
+      }
+
+      submitTextBtn.disabled = true;
+      submitTextBtn.textContent = '发送中...';
+
+      try {
+        const response = await fetch('/api/items/text', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ text })
+        });
+        const data = await handleResponse(response);
+        if (data) {
+          textInput.value = '';
+          await loadItems();
+        }
+      } catch (error) {
+        showError('提交文本失败: ' + error.message);
+      } finally {
+        submitTextBtn.disabled = false;
+        submitTextBtn.textContent = '发送文本';
+      }
+    }
+
+    fileInput.addEventListener('change', async (e) => {
+      const file = e.target.files[0];
+      if (!file) {
+        selectedFile.textContent = '';
+        return;
+      }
+
+      selectedFile.textContent = `已选择: ${file.name}`;
+      uploadLabel.classList.add('disabled');
+      uploadLabel.textContent = '上传中...';
+
+      const formData = new FormData();
+      formData.append('file', file);
+
+      try {
+        const response = await fetch('/api/items/file', {
+          method: 'POST',
+          body: formData
+        });
+        const data = await handleResponse(response);
+        if (data) {
+          fileInput.value = '';
+          selectedFile.textContent = '';
+          await loadItems();
+        }
+      } catch (error) {
+        showError('上传文件失败: ' + error.message);
+      } finally {
+        uploadLabel.classList.remove('disabled');
+        uploadLabel.textContent = '选择文件';
+      }
+    });
+
+    async function deleteItem(id) {
+      try {
+        const response = await fetch(`/api/items/${id}`, {
+          method: 'DELETE'
+        });
+        await handleResponse(response);
+        loadItems();
+      } catch (error) {
+        showError('删除失败: ' + error.message);
+      }
+    }
+
+    textInput.addEventListener('keydown', async (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        submitText();
+      }
+    });
+
+    submitTextBtn.addEventListener('click', submitText);
+    window.addEventListener('resize', scheduleLayout);
+    lightboxClose.addEventListener('click', closeLightbox);
+    lightbox.addEventListener('click', (event) => {
+      if (event.target === lightbox) {
+        closeLightbox();
+      }
+    });
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape' && lightbox.classList.contains('visible')) {
+        closeLightbox();
+      }
+    });
+
+    loadItems();
+  </script>
+</body>
+</html>
