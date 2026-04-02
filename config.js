@@ -41,7 +41,7 @@ module.exports = {
   dataFile: path.resolve(readString('DATA_FILE') || path.join(__dirname, 'data.json')),
   sessionSecret,
   sessionName: readString('SESSION_NAME') || 'some_transfer.sid',
-  maxFileSizeBytes: readPositiveInt('MAX_FILE_SIZE_BYTES', 25 * 1024 * 1024),
+  maxFileSizeBytes: readPositiveInt('MAX_FILE_SIZE_BYTES', 100 * 1024 * 1024),
   bodyLimit: readString('BODY_LIMIT') || '64kb',
   loginWindowMs: readPositiveInt('LOGIN_WINDOW_MS', 15 * 60 * 1000),
   loginMaxAttempts: readPositiveInt('LOGIN_MAX_ATTEMPTS', 5),

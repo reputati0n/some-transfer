@@ -205,7 +205,7 @@ chmod +x build-and-run.sh
 | `PORT` | 否 | 服务监听端口，默认 `3000` |
 | `UPLOAD_DIR` | 否 | 上传文件目录，默认 `./uploads` |
 | `DATA_FILE` | 否 | 数据文件路径，默认 `./data.json` |
-| `MAX_FILE_SIZE_BYTES` | 否 | 单文件最大体积，默认 `26214400` |
+| `MAX_FILE_SIZE_BYTES` | 否 | 单文件最大体积，默认 `104857600`（100MB） |
 | `BODY_LIMIT` | 否 | 请求体大小限制，默认 `64kb` |
 | `LOGIN_WINDOW_MS` | 否 | 登录限流时间窗口，默认 `900000` |
 | `LOGIN_MAX_ATTEMPTS` | 否 | 限流窗口内最大尝试次数，默认 `5` |
