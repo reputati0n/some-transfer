@@ -4,13 +4,20 @@ const path = require('path');
 const fs = require('fs');
 const crypto = require('crypto');
 const session = require('express-session');
+
+// 加载环境变量
+if (fs.existsSync('.env')) {
+  require('dotenv').config();
+}
+
 const config = require('./config');
 const store = require('./store');
 
 const app = express();
 const uploadDir = config.uploadDir;
 const loginAttempts = new Map();
-const imageExtensions = new Set(['.jpg', '.jpeg', '.png', '.gif', '.bmp', '.webp', '.svg']);
+const imageExtensions = new Set(['.jpg', '.jpeg', '.png', '.gif', '.bmp', '.webp']);
+const unsafeMethods = new Set(['POST', 'PUT', 'PATCH', 'DELETE']);
 
 if (config.trustProxy) {
   app.set('trust proxy', 1);
@@ -38,11 +45,13 @@ app.use(session({
   secret: config.sessionSecret,
   resave: false,
   saveUninitialized: false,
+  unset: 'destroy',
   rolling: true,
   cookie: {
     httpOnly: true,
     sameSite: 'lax',
     secure: config.isProduction,
+    priority: 'high',
     maxAge: 24 * 60 * 60 * 1000
   }
 }));
@@ -139,6 +148,32 @@ function safeCompare(secret, input) {
   return crypto.timingSafeEqual(left, right);
 }
 
+function getExpectedOrigin(req) {
+  if (config.appOrigin) {
+    return config.appOrigin;
+  }
+
+  const host = req.get('host');
+  if (!host) {
+    return '';
+  }
+
+  return `${req.protocol}://${host}`;
+}
+
+function isTrustedOrigin(req) {
+  const origin = req.get('origin');
+  if (!origin) {
+    return true;
+  }
+
+  try {
+    return new URL(origin).origin === new URL(getExpectedOrigin(req)).origin;
+  } catch (error) {
+    return false;
+  }
+}
+
 function resolveUploadPath(storedFilename) {
   const candidate = path.resolve(uploadDir, storedFilename);
   if (!candidate.startsWith(uploadDir + path.sep)) {
@@ -168,6 +203,18 @@ function getFileItemOr404(req, res) {
 
   return { item, filePath };
 }
+
+app.use((req, res, next) => {
+  if (!unsafeMethods.has(req.method)) {
+    return next();
+  }
+
+  if (isTrustedOrigin(req)) {
+    return next();
+  }
+
+  res.status(403).json({ error: '不允许的请求来源' });
+});
 
 app.post('/login', (req, res) => {
   const pin = typeof req.body.pin === 'string' ? req.body.pin.trim() : '';
@@ -206,6 +253,7 @@ app.post('/logout', checkAuth, (req, res) => {
 });
 
 app.get('/', (req, res) => {
+  res.setHeader('Cache-Control', 'no-store');
   if (req.session && req.session.isAuthenticated) {
     return res.redirect('/index.html');
   }
@@ -215,6 +263,7 @@ app.get('/', (req, res) => {
 app.use('/assets', express.static(path.join(__dirname, 'public', 'assets')));
 
 app.get('/index.html', checkAuth, (req, res) => {
+  res.setHeader('Cache-Control', 'no-store');
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
@@ -305,6 +354,7 @@ app.get('/download/:filename', checkAuth, (req, res) => {
   }
 
   const { item, filePath } = fileData;
+  res.setHeader('Cache-Control', 'private, no-store');
   res.download(filePath, item.filename);
 });
 
@@ -320,6 +370,7 @@ app.get('/preview/:filename', checkAuth, (req, res) => {
     return res.status(400).json({ error: '该文件不支持预览' });
   }
 
+  res.setHeader('Cache-Control', 'private, no-store');
   res.type(path.extname(item.filename));
   res.sendFile(filePath);
 });

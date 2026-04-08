@@ -943,7 +943,7 @@
     }
 
     function isImageFile(filename) {
-      const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.bmp', '.webp', '.svg'];
+      const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.bmp', '.webp'];
       const ext = filename.toLowerCase().substring(filename.lastIndexOf('.'));
       return imageExtensions.includes(ext);
     }

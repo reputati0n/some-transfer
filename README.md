@@ -189,6 +189,7 @@ chmod +x build-and-run.sh
 | `LOGIN_WINDOW_MS` | 否 | 登录限流时间窗口，默认 `900000` |
 | `LOGIN_MAX_ATTEMPTS` | 否 | 限流窗口内最大尝试次数，默认 `5` |
 | `TRUST_PROXY` | 否 | 是否信任反向代理，默认 `false` |
+| `APP_ORIGIN` | 否 | 服务对外访问地址，用于校验跨站写请求，例如 `https://transfer.example.com` |
 | `SESSION_NAME` | 否 | Session Cookie 名称，默认 `some_transfer.sid` |
 | `NODE_ENV` | 否 | 运行环境，生产环境建议使用 `production` |
 

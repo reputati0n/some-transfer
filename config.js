@@ -11,12 +11,21 @@ function readPositiveInt(name, fallback) {
   return Number.isInteger(value) && value > 0 ? value : fallback;
 }
 
+function looksLikePlaceholderSecret(value) {
+  const normalized = String(value || '').toLowerCase();
+  return normalized.includes('replace-with') || normalized.includes('your-session-secret');
+}
+
 const env = readString('NODE_ENV') || 'development';
 const isProduction = env === 'production';
 
 const pin = readString('APP_PIN');
 if (!pin) {
   throw new Error('Missing required environment variable: APP_PIN');
+}
+
+if (pin.length < 8) {
+  console.warn('APP_PIN is shorter than 8 characters. Use a longer random value for better security.');
 }
 
 let sessionSecret = readString('SESSION_SECRET');
@@ -32,6 +41,13 @@ if (sessionSecret.length < 32) {
   throw new Error('SESSION_SECRET must be at least 32 characters long.');
 }
 
+if (looksLikePlaceholderSecret(sessionSecret)) {
+  if (isProduction) {
+    throw new Error('SESSION_SECRET must be replaced with a real random secret in production.');
+  }
+  console.warn('SESSION_SECRET still looks like a placeholder. Replace it before exposing the service.');
+}
+
 module.exports = {
   env,
   isProduction,
@@ -45,5 +61,6 @@ module.exports = {
   bodyLimit: readString('BODY_LIMIT') || '64kb',
   loginWindowMs: readPositiveInt('LOGIN_WINDOW_MS', 15 * 60 * 1000),
   loginMaxAttempts: readPositiveInt('LOGIN_MAX_ATTEMPTS', 5),
-  trustProxy: readString('TRUST_PROXY') === 'true'
+  trustProxy: readString('TRUST_PROXY') === 'true',
+  appOrigin: readString('APP_ORIGIN')
 };

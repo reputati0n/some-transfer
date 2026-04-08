@@ -1,8 +1,8 @@
-node_modules
-uploads
-data
-data.json
 .env
 .env.*
 !.env.example
-.DS_Store
+node_modules/
+uploads/
+data/
+data.json
+npm-debug.log*
