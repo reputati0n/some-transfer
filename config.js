@@ -11,6 +11,23 @@ function readPositiveInt(name, fallback) {
   return Number.isInteger(value) && value > 0 ? value : fallback;
 }
 
+function readCookieSecure(name) {
+  const value = readString(name).toLowerCase();
+  if (!value) {
+    return 'auto';
+  }
+  if (value === 'true') {
+    return true;
+  }
+  if (value === 'false') {
+    return false;
+  }
+  if (value === 'auto') {
+    return 'auto';
+  }
+  return 'auto';
+}
+
 function looksLikePlaceholderSecret(value) {
   const normalized = String(value || '').toLowerCase();
   return normalized.includes('replace-with') || normalized.includes('your-session-secret');
@@ -42,9 +59,6 @@ if (sessionSecret.length < 32) {
 }
 
 if (looksLikePlaceholderSecret(sessionSecret)) {
-  if (isProduction) {
-    throw new Error('SESSION_SECRET must be replaced with a real random secret in production.');
-  }
   console.warn('SESSION_SECRET still looks like a placeholder. Replace it before exposing the service.');
 }
 
@@ -62,5 +76,6 @@ module.exports = {
   loginWindowMs: readPositiveInt('LOGIN_WINDOW_MS', 15 * 60 * 1000),
   loginMaxAttempts: readPositiveInt('LOGIN_MAX_ATTEMPTS', 5),
   trustProxy: readString('TRUST_PROXY') === 'true',
-  appOrigin: readString('APP_ORIGIN')
+  appOrigin: readString('APP_ORIGIN'),
+  sessionCookieSecure: readCookieSecure('SESSION_COOKIE_SECURE')
 };

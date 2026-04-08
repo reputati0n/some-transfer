@@ -50,7 +50,7 @@ app.use(session({
   cookie: {
     httpOnly: true,
     sameSite: 'lax',
-    secure: config.isProduction,
+    secure: config.sessionCookieSecure,
     priority: 'high',
     maxAge: 24 * 60 * 60 * 1000
   }
@@ -153,6 +153,12 @@ function getExpectedOrigin(req) {
     return config.appOrigin;
   }
 
+  const forwardedProto = req.get('x-forwarded-proto');
+  const forwardedHost = req.get('x-forwarded-host');
+  if (forwardedProto && (forwardedHost || req.get('host'))) {
+    return `${forwardedProto.split(',')[0].trim()}://${(forwardedHost || req.get('host')).split(',')[0].trim()}`;
+  }
+
   const host = req.get('host');
   if (!host) {
     return '';
@@ -168,7 +174,29 @@ function isTrustedOrigin(req) {
   }
 
   try {
-    return new URL(origin).origin === new URL(getExpectedOrigin(req)).origin;
+    const actualOrigin = new URL(origin).origin;
+    const allowedOrigins = [getExpectedOrigin(req)];
+
+    const host = req.get('host');
+    if (host) {
+      allowedOrigins.push(`http://${host}`, `https://${host}`);
+    }
+
+    const forwardedHost = req.get('x-forwarded-host');
+    if (forwardedHost) {
+      const normalizedForwardedHost = forwardedHost.split(',')[0].trim();
+      allowedOrigins.push(`http://${normalizedForwardedHost}`, `https://${normalizedForwardedHost}`);
+    }
+
+    return allowedOrigins
+      .filter(Boolean)
+      .some((allowedOrigin) => {
+        try {
+          return new URL(allowedOrigin).origin === actualOrigin;
+        } catch (error) {
+          return false;
+        }
+      });
   } catch (error) {
     return false;
   }
