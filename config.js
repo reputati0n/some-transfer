@@ -75,6 +75,7 @@ module.exports = {
   bodyLimit: readString('BODY_LIMIT') || '64kb',
   loginWindowMs: readPositiveInt('LOGIN_WINDOW_MS', 15 * 60 * 1000),
   loginMaxAttempts: readPositiveInt('LOGIN_MAX_ATTEMPTS', 5),
+  loginLockMs: readPositiveInt('LOGIN_LOCK_MS', 24 * 60 * 60 * 1000),
   trustProxy: readString('TRUST_PROXY') === 'true',
   appOrigin: readString('APP_ORIGIN'),
   sessionCookieSecure: readCookieSecure('SESSION_COOKIE_SECURE')

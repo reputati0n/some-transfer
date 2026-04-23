@@ -8,6 +8,7 @@
 - **文件上传**: 单文件最大 100MB（可配置）
 - **图片预览**: 内置大图查看器
 - **PIN 登录**: 简单认证，无需注册
+- **登录锁定**: 在指定时间窗口内连续输错 PIN 达到阈值后自动锁定登录
 - **响应式界面**: 适配桌面与移动端
 
 ## 快速开始
@@ -41,6 +42,9 @@ docker compose up -d --build
 | `SESSION_SECRET` | 是 | Session 密钥，至少 32 位 |
 | `PORT` | 否 | 端口，默认 3000 |
 | `MAX_FILE_SIZE_BYTES` | 否 | 最大文件体积，默认 100MB |
+| `LOGIN_WINDOW_MS` | 否 | 统计登录失败次数的时间窗口，默认 15 分钟 |
+| `LOGIN_MAX_ATTEMPTS` | 否 | 连续输错多少次后锁定，默认 5 |
+| `LOGIN_LOCK_MS` | 否 | 锁定时长，默认 24 小时 |
 
 完整配置见 [.env.example](.env.example)
 

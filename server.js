@@ -102,22 +102,35 @@ function getClientKey(req) {
 
 function cleanupExpiredLoginAttempts(now) {
   for (const [key, entry] of loginAttempts.entries()) {
+    if (entry.lockedUntil && now < entry.lockedUntil) {
+      continue;
+    }
+
+    if (entry.lockedUntil && now >= entry.lockedUntil) {
+      loginAttempts.delete(key);
+      continue;
+    }
+
     if (now - entry.firstAttemptAt > config.loginWindowMs) {
       loginAttempts.delete(key);
     }
   }
 }
 
-function isRateLimited(req) {
+function getLockoutRemainingMs(req) {
   const now = Date.now();
   cleanupExpiredLoginAttempts(now);
 
   const entry = loginAttempts.get(getClientKey(req));
   if (!entry) {
-    return false;
+    return 0;
   }
 
-  return entry.count >= config.loginMaxAttempts && now - entry.firstAttemptAt <= config.loginWindowMs;
+  if (!entry.lockedUntil || now >= entry.lockedUntil) {
+    return 0;
+  }
+
+  return entry.lockedUntil - now;
 }
 
 function recordLoginFailure(req) {
@@ -125,16 +138,35 @@ function recordLoginFailure(req) {
   const key = getClientKey(req);
   const existing = loginAttempts.get(key);
 
-  if (!existing || now - existing.firstAttemptAt > config.loginWindowMs) {
-    loginAttempts.set(key, { count: 1, firstAttemptAt: now });
+  if (!existing || existing.lockedUntil || now - existing.firstAttemptAt > config.loginWindowMs) {
+    loginAttempts.set(key, { count: 1, firstAttemptAt: now, lockedUntil: 0 });
     return;
   }
 
   existing.count += 1;
+  if (existing.count >= config.loginMaxAttempts) {
+    existing.lockedUntil = now + config.loginLockMs;
+  }
 }
 
 function clearLoginFailures(req) {
   loginAttempts.delete(getClientKey(req));
+}
+
+function formatLockDuration(ms) {
+  const totalMinutes = Math.ceil(ms / 60000);
+  const hours = Math.floor(totalMinutes / 60);
+  const minutes = totalMinutes % 60;
+
+  if (hours > 0 && minutes > 0) {
+    return `${hours} 小时 ${minutes} 分钟`;
+  }
+
+  if (hours > 0) {
+    return `${hours} 小时`;
+  }
+
+  return `${Math.max(totalMinutes, 1)} 分钟`;
 }
 
 function safeCompare(secret, input) {
@@ -246,9 +278,13 @@ app.use((req, res, next) => {
 
 app.post('/login', (req, res) => {
   const pin = typeof req.body.pin === 'string' ? req.body.pin.trim() : '';
+  const lockoutRemainingMs = getLockoutRemainingMs(req);
 
-  if (isRateLimited(req)) {
-    return res.status(429).json({ success: false, message: '尝试次数过多，请稍后再试' });
+  if (lockoutRemainingMs > 0) {
+    return res.status(429).json({
+      success: false,
+      message: `PIN 连续输错次数过多，已禁止登录，请 ${formatLockDuration(lockoutRemainingMs)} 后再试`
+    });
   }
 
   if (pin && safeCompare(config.pin, pin)) {
@@ -264,6 +300,14 @@ app.post('/login', (req, res) => {
     });
   } else {
     recordLoginFailure(req);
+    const remainingMsAfterFailure = getLockoutRemainingMs(req);
+    if (remainingMsAfterFailure > 0) {
+      return res.status(429).json({
+        success: false,
+        message: `PIN 连续输错 ${config.loginMaxAttempts} 次，已禁止登录，请 ${formatLockDuration(remainingMsAfterFailure)} 后再试`
+      });
+    }
+
     res.status(401).json({ success: false, message: 'Pin码错误' });
   }
 });
