@@ -21,6 +21,8 @@
       --blue: #2d78bf;
       --shadow-lg: 0 34px 90px rgba(60, 41, 24, 0.14);
       --shadow-md: 0 18px 44px rgba(60, 41, 24, 0.1);
+      --item-surface: rgba(255, 252, 247, 0.96);
+      --item-shadow: 0 10px 28px rgba(60, 41, 24, 0.08);
       --radius-xl: 28px;
       --radius-lg: 22px;
       --radius-md: 18px;
@@ -57,11 +59,11 @@
 
     .hero-card,
     .status-card,
-    .composer,
-    .item {
+    .composer {
       background: var(--panel);
       border: 1px solid var(--line);
       backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
       box-shadow: var(--shadow-lg);
     }
 
@@ -381,29 +383,13 @@
       position: relative;
       padding: 22px;
       border-radius: 24px;
-      box-shadow: var(--shadow-md);
-      animation: cardIn 0.35s ease both;
-      will-change: top, left;
-    }
-
-    @keyframes cardIn {
-      from {
-        opacity: 0;
-        transform: translateY(12px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
-    .item::before {
-      content: "";
-      position: absolute;
-      inset: 0;
-      border-radius: inherit;
-      background: linear-gradient(180deg, rgba(255, 255, 255, 0.18), transparent);
-      pointer-events: none;
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.24), transparent 42%),
+        var(--item-surface);
+      border: 1px solid var(--line);
+      box-shadow: var(--item-shadow);
+      contain: layout paint style;
+      overflow: hidden;
     }
 
     .item-badge {
@@ -503,14 +489,14 @@
       overflow: hidden;
       background: rgba(255, 255, 255, 0.64);
       border: 1px solid rgba(102, 83, 57, 0.08);
-      min-height: 220px;
+      height: 220px;
       display: grid;
       place-items: center;
     }
 
     .file-preview {
       width: 100%;
-      max-height: 300px;
+      height: 100%;
       object-fit: contain;
       display: block;
       cursor: zoom-in;
@@ -929,9 +915,11 @@
           if (data.length === 0) {
             contentGrid.innerHTML = '<div class="empty-state">暂无内容。<br>你可以先发送一段文本，或者上传一个文件作为起点。</div>';
           } else {
+            const fragment = document.createDocumentFragment();
             data.slice().reverse().forEach(item => {
-              renderItem(item);
+              fragment.appendChild(renderItem(item));
             });
+            contentGrid.appendChild(fragment);
           }
 
           scheduleLayout();
@@ -978,6 +966,7 @@
     }
 
     function layoutItems() {
+      layoutFrame = null;
       const items = Array.from(contentGrid.querySelectorAll('.item'));
       const emptyState = contentGrid.querySelector('.empty-state');
 
@@ -999,17 +988,23 @@
       items.forEach((item) => {
         item.style.position = 'absolute';
         item.style.width = `${columnWidth}px`;
+        item.style.left = '0px';
+        item.style.top = '0px';
+      });
 
+      const itemHeights = items.map(item => item.offsetHeight);
+
+      items.forEach((item, index) => {
         const shortestColumn = columnHeights.indexOf(Math.min(...columnHeights));
         const x = shortestColumn * (columnWidth + masonryGap);
         const y = columnHeights[shortestColumn];
 
-        item.style.left = `${x}px`;
-        item.style.top = `${y}px`;
-        columnHeights[shortestColumn] += item.offsetHeight + masonryGap;
+        item.style.transform = `translate3d(${x}px, ${y}px, 0)`;
+        columnHeights[shortestColumn] += itemHeights[index] + masonryGap;
       });
 
       contentGrid.style.height = `${Math.max(...columnHeights) - masonryGap}px`;
+      scheduleOverflowCheck();
     }
 
     let layoutFrame = null;
@@ -1018,6 +1013,44 @@
         cancelAnimationFrame(layoutFrame);
       }
       layoutFrame = requestAnimationFrame(layoutItems);
+    }
+
+    let overflowCheckFrame = null;
+    function scheduleOverflowCheck() {
+      if (overflowCheckFrame) {
+        return;
+      }
+
+      overflowCheckFrame = requestAnimationFrame(() => {
+        overflowCheckFrame = null;
+        if (updateExpandableButtons()) {
+          scheduleLayout();
+        }
+      });
+    }
+
+    function updateExpandableButtons() {
+      let layoutChanged = false;
+      const textBlocks = contentGrid.querySelectorAll('.item-text');
+
+      textBlocks.forEach((textContent) => {
+        const actions = textContent.nextElementSibling;
+        const expandBtn = actions ? actions.querySelector('.expand-btn') : null;
+        if (!expandBtn) {
+          return;
+        }
+
+        const shouldShow = textContent.classList.contains('expanded') ||
+          textContent.scrollHeight > textContent.clientHeight + 4;
+        const isVisible = expandBtn.classList.contains('visible');
+
+        if (shouldShow !== isVisible) {
+          expandBtn.classList.toggle('visible', shouldShow);
+          layoutChanged = true;
+        }
+      });
+
+      return layoutChanged;
     }
 
     async function copyText(text, btn) {
@@ -1072,13 +1105,6 @@
         };
         actions.appendChild(expandBtn);
         itemElement.appendChild(actions);
-
-        requestAnimationFrame(() => {
-          if (textContent.scrollHeight > textContent.clientHeight + 4) {
-            expandBtn.classList.add('visible');
-            scheduleLayout();
-          }
-        });
       } else if (item.type === 'file') {
         const fileContent = document.createElement('div');
         fileContent.className = 'item-file';
@@ -1089,6 +1115,9 @@
 
           const img = document.createElement('img');
           img.className = 'file-preview';
+          img.loading = 'lazy';
+          img.decoding = 'async';
+          img.fetchPriority = 'low';
           img.src = `/preview/${item.filepath}`;
           img.alt = item.filename;
           img.onclick = () => openLightbox({
@@ -1125,7 +1154,7 @@
       timeElement.textContent = new Date(item.timestamp).toLocaleString();
       itemElement.appendChild(timeElement);
 
-      contentGrid.appendChild(itemElement);
+      return itemElement;
     }
 
     function renderTextContent(text) {
