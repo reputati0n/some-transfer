@@ -9,13 +9,13 @@
   <style>
     :root {
       --bg: #f3efe7;
-      --panel: rgba(255, 251, 245, 0.88);
+      --panel: rgba(255, 251, 245, 0.96);
       --panel-border: rgba(112, 89, 56, 0.14);
       --text: #1d1b18;
       --muted: #6c655c;
       --accent: #c96f3b;
       --accent-strong: #ab5422;
-      --shadow: 0 28px 80px rgba(61, 42, 22, 0.16);
+      --shadow: 0 16px 40px rgba(61, 42, 22, 0.1);
       --radius: 28px;
     }
 
@@ -33,10 +33,7 @@
       justify-content: center;
       font-family: "Avenir Next", "PingFang SC", "Noto Sans SC", sans-serif;
       color: var(--text);
-      background:
-        radial-gradient(circle at top left, rgba(214, 134, 80, 0.22), transparent 30%),
-        radial-gradient(circle at bottom right, rgba(88, 117, 156, 0.18), transparent 35%),
-        linear-gradient(135deg, #f8f3eb 0%, #efe8de 45%, #e9e4dc 100%);
+      background: linear-gradient(135deg, #f8f3eb 0%, #efe8de 48%, #e9e4dc 100%);
       padding: 24px;
     }
 
@@ -56,7 +53,6 @@
       border: 1px solid var(--panel-border);
       border-radius: var(--radius);
       background: var(--panel);
-      backdrop-filter: blur(18px);
       box-shadow: var(--shadow);
     }
 
@@ -67,17 +63,6 @@
       justify-content: center;
       gap: 36px;
       min-height: 620px;
-    }
-
-    .intro-panel::before,
-    .login-panel::before {
-      content: "";
-      position: absolute;
-      inset: auto auto 0 0;
-      width: 260px;
-      height: 260px;
-      background: radial-gradient(circle, rgba(201, 111, 59, 0.18), transparent 70%);
-      pointer-events: none;
     }
 
     .eyebrow {
@@ -165,7 +150,7 @@
       border-radius: 26px;
       background: rgba(255, 255, 255, 0.8);
       border: 1px solid rgba(112, 89, 56, 0.08);
-      box-shadow: 0 18px 40px rgba(61, 42, 22, 0.1);
+      box-shadow: 0 10px 24px rgba(61, 42, 22, 0.08);
     }
 
     .login-card h2 {
@@ -199,14 +184,13 @@
       background: rgba(255, 255, 255, 0.9);
       font-size: 16px;
       color: var(--text);
-      transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+      transition: border-color 0.16s ease, box-shadow 0.16s ease;
       outline: none;
     }
 
     input[type="password"]:focus {
       border-color: rgba(201, 111, 59, 0.7);
       box-shadow: 0 0 0 5px rgba(201, 111, 59, 0.12);
-      transform: translateY(-1px);
     }
 
     button {
@@ -219,17 +203,16 @@
       font-size: 16px;
       font-weight: 600;
       cursor: pointer;
-      transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
-      box-shadow: 0 20px 34px rgba(171, 84, 34, 0.22);
+      transition: box-shadow 0.16s ease, opacity 0.16s ease;
+      box-shadow: 0 10px 22px rgba(171, 84, 34, 0.16);
     }
 
     button:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 24px 40px rgba(171, 84, 34, 0.3);
+      box-shadow: 0 14px 28px rgba(171, 84, 34, 0.22);
     }
 
     button:active {
-      transform: translateY(0);
+      box-shadow: 0 8px 18px rgba(171, 84, 34, 0.16);
     }
 
     button:disabled {

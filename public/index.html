@@ -9,8 +9,8 @@
   <style>
     :root {
       --bg: #f4efe8;
-      --panel: rgba(255, 251, 245, 0.84);
-      --panel-strong: rgba(255, 255, 255, 0.9);
+      --panel: rgba(255, 251, 245, 0.94);
+      --panel-strong: rgba(255, 255, 255, 0.96);
       --line: rgba(102, 83, 57, 0.12);
       --text: #1d1b18;
       --muted: #6f675e;
@@ -19,10 +19,10 @@
       --danger: #c94635;
       --danger-deep: #9d301f;
       --blue: #2d78bf;
-      --shadow-lg: 0 34px 90px rgba(60, 41, 24, 0.14);
-      --shadow-md: 0 18px 44px rgba(60, 41, 24, 0.1);
+      --shadow-lg: 0 18px 42px rgba(60, 41, 24, 0.1);
+      --shadow-md: 0 10px 24px rgba(60, 41, 24, 0.08);
       --item-surface: rgba(255, 252, 247, 0.96);
-      --item-shadow: 0 10px 28px rgba(60, 41, 24, 0.08);
+      --item-shadow: 0 6px 18px rgba(60, 41, 24, 0.06);
       --radius-xl: 28px;
       --radius-lg: 22px;
       --radius-md: 18px;
@@ -37,10 +37,7 @@
       min-height: 100vh;
       font-family: "Avenir Next", "PingFang SC", "Noto Sans SC", sans-serif;
       color: var(--text);
-      background:
-        radial-gradient(circle at top left, rgba(212, 133, 87, 0.22), transparent 24%),
-        radial-gradient(circle at bottom right, rgba(94, 122, 160, 0.14), transparent 28%),
-        linear-gradient(145deg, #f7f1e8 0%, #eee7de 48%, #ebe6de 100%);
+      background: linear-gradient(145deg, #f7f1e8 0%, #eee7de 52%, #ebe6de 100%);
       padding: 24px;
     }
 
@@ -62,9 +59,7 @@
     .composer {
       background: var(--panel);
       border: 1px solid var(--line);
-      backdrop-filter: blur(18px);
-      -webkit-backdrop-filter: blur(18px);
-      box-shadow: var(--shadow-lg);
+      box-shadow: var(--shadow-md);
     }
 
     .hero-card,
@@ -77,27 +72,6 @@
       padding: 34px;
       position: relative;
       overflow: hidden;
-    }
-
-    .hero-card::after,
-    .status-card::after {
-      content: "";
-      position: absolute;
-      width: 260px;
-      height: 260px;
-      border-radius: 50%;
-      background: radial-gradient(circle, rgba(204, 111, 57, 0.14), transparent 70%);
-      pointer-events: none;
-    }
-
-    .hero-card::after {
-      right: -60px;
-      top: -70px;
-    }
-
-    .status-card::after {
-      left: -90px;
-      bottom: -120px;
     }
 
     .eyebrow {
@@ -212,12 +186,13 @@
     .upload-label,
     .composer-submit,
     .file-download,
+    .image-preview-btn,
     .copy-btn,
     .delete-btn,
     .expand-btn {
       border: none;
       cursor: pointer;
-      transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease, background 0.2s ease;
+      transition: box-shadow 0.16s ease, opacity 0.16s ease, background 0.16s ease;
       font-family: inherit;
     }
 
@@ -227,7 +202,7 @@
       border-radius: 16px;
       color: white;
       background: linear-gradient(135deg, var(--danger) 0%, var(--danger-deep) 100%);
-      box-shadow: 0 18px 30px rgba(157, 48, 31, 0.2);
+      box-shadow: 0 10px 20px rgba(157, 48, 31, 0.16);
       font-size: 14px;
       font-weight: 600;
     }
@@ -236,9 +211,10 @@
     .upload-label:hover,
     .composer-submit:hover,
     .file-download:hover,
+    .image-preview-btn:hover,
     .copy-btn:hover,
     .delete-btn:hover {
-      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
     }
 
     .composer {
@@ -292,13 +268,12 @@
       resize: none;
       tab-size: 2;
       outline: none;
-      transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+      transition: border-color 0.16s ease, box-shadow 0.16s ease;
     }
 
     .text-input:focus {
       border-color: rgba(204, 111, 57, 0.72);
       box-shadow: 0 0 0 5px rgba(204, 111, 57, 0.12);
-      transform: translateY(-1px);
     }
 
     .file-upload input[type="file"] {
@@ -325,12 +300,12 @@
 
     .upload-label {
       background: linear-gradient(135deg, #275f93 0%, #2d78bf 100%);
-      box-shadow: 0 18px 30px rgba(45, 120, 191, 0.2);
+      box-shadow: 0 10px 20px rgba(45, 120, 191, 0.16);
     }
 
     .composer-submit {
       background: linear-gradient(135deg, var(--accent) 0%, var(--accent-deep) 100%);
-      box-shadow: 0 18px 32px rgba(167, 79, 29, 0.2);
+      box-shadow: 0 10px 22px rgba(167, 79, 29, 0.16);
     }
 
     .composer-submit:disabled,
@@ -375,20 +350,30 @@
     }
 
     .content-grid {
-      position: relative;
+      column-width: 320px;
+      column-gap: 18px;
       min-height: 120px;
+    }
+
+    .content-grid.is-empty {
+      column-count: 1;
+      column-width: auto;
     }
 
     .item {
       position: relative;
+      display: inline-block;
+      width: 100%;
+      margin: 0 0 18px;
       padding: 22px;
       border-radius: 24px;
-      background:
-        linear-gradient(180deg, rgba(255, 255, 255, 0.24), transparent 42%),
-        var(--item-surface);
+      background: var(--item-surface);
       border: 1px solid var(--line);
       box-shadow: var(--item-shadow);
-      contain: layout paint style;
+      break-inside: avoid;
+      contain: content;
+      content-visibility: auto;
+      contain-intrinsic-size: 360px;
       overflow: hidden;
     }
 
@@ -407,30 +392,18 @@
     }
 
     .item-text {
-      display: grid;
-      gap: 6px;
       line-height: 1.8;
       font-size: 15px;
       padding-right: 6px;
-      max-height: calc(1.8em * 10 + 54px);
+      max-height: calc(1.8em * 10);
       overflow: hidden;
+      overflow-wrap: anywhere;
+      white-space: break-spaces;
     }
 
     .item-text.expanded {
       max-height: none;
       overflow: visible;
-    }
-
-    .item-text-line {
-      white-space: pre;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    .item-text.expanded .item-text-line {
-      white-space: pre;
-      overflow: hidden;
-      text-overflow: ellipsis;
     }
 
     .item-actions {
@@ -484,24 +457,6 @@
       gap: 16px;
     }
 
-    .preview-wrap {
-      border-radius: 20px;
-      overflow: hidden;
-      background: rgba(255, 255, 255, 0.64);
-      border: 1px solid rgba(102, 83, 57, 0.08);
-      height: 220px;
-      display: grid;
-      place-items: center;
-    }
-
-    .file-preview {
-      width: 100%;
-      height: 100%;
-      object-fit: contain;
-      display: block;
-      cursor: zoom-in;
-    }
-
     .lightbox {
       position: fixed;
       inset: 0;
@@ -511,10 +466,9 @@
       justify-content: center;
       padding: 28px;
       background: rgba(29, 27, 24, 0.74);
-      backdrop-filter: blur(12px);
       opacity: 0;
       pointer-events: none;
-      transition: opacity 0.22s ease;
+      transition: opacity 0.16s ease;
     }
 
     .lightbox.visible {
@@ -530,16 +484,10 @@
       border-radius: 28px;
       background: rgba(255, 251, 245, 0.96);
       border: 1px solid rgba(255, 255, 255, 0.36);
-      box-shadow: 0 34px 90px rgba(0, 0, 0, 0.22);
+      box-shadow: 0 18px 48px rgba(0, 0, 0, 0.2);
       display: flex;
       flex-direction: column;
       gap: 12px;
-      transform: translateY(10px) scale(0.98);
-      transition: transform 0.22s ease;
-    }
-
-    .lightbox.visible .lightbox-panel {
-      transform: translateY(0) scale(1);
     }
 
     .lightbox-close {
@@ -555,11 +503,10 @@
       font-size: 24px;
       line-height: 1;
       cursor: pointer;
-      transition: transform 0.2s ease, background 0.2s ease;
+      transition: background 0.16s ease;
     }
 
     .lightbox-close:hover {
-      transform: scale(1.04);
       background: rgba(29, 27, 24, 0.14);
     }
 
@@ -628,7 +575,27 @@
     .file-download {
       width: fit-content;
       background: linear-gradient(135deg, #275f93 0%, #2d78bf 100%);
-      box-shadow: 0 18px 30px rgba(45, 120, 191, 0.2);
+      box-shadow: 0 10px 20px rgba(45, 120, 191, 0.16);
+    }
+
+    .file-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .image-preview-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 58px;
+      padding: 0 20px;
+      border-radius: 20px;
+      background: rgba(204, 111, 57, 0.12);
+      color: var(--accent-deep);
+      font-size: 15px;
+      font-weight: 600;
+      white-space: nowrap;
     }
 
     .item-time {
@@ -642,6 +609,7 @@
       display: block;
       width: 100%;
       padding: 60px 28px;
+      break-inside: avoid;
       text-align: center;
       border-radius: 28px;
       background: rgba(255, 255, 255, 0.66);
@@ -854,8 +822,6 @@
     const lightboxTitle = document.getElementById('lightbox-title');
     const lightboxSize = document.getElementById('lightbox-size');
     const lightboxClose = document.getElementById('lightbox-close');
-    const masonryGap = 18;
-    const masonryMinWidth = 320;
 
     function showError(message) {
       errorMessage.textContent = message;
@@ -910,6 +876,7 @@
         const data = await handleResponse(response);
         if (data) {
           contentGrid.innerHTML = '';
+          contentGrid.classList.toggle('is-empty', data.length === 0);
           updateStats(data);
 
           if (data.length === 0) {
@@ -922,7 +889,6 @@
             contentGrid.appendChild(fragment);
           }
 
-          scheduleLayout();
         }
       } catch (error) {
         showError('加载内容失败: ' + error.message);
@@ -935,16 +901,14 @@
       return imageExtensions.includes(ext);
     }
 
-    function escapeHtml(text) {
-      const div = document.createElement('div');
-      div.textContent = text;
-      return div.innerHTML;
-    }
-
     function formatSize(bytes) {
       if (bytes < 1024) return bytes + ' B';
       if (bytes < 1048576) return (bytes / 1024).toFixed(2) + ' KB';
       return (bytes / 1048576).toFixed(2) + ' MB';
+    }
+
+    function shouldShowExpandButton(text) {
+      return text.length > 520 || text.split('\n').length > 10;
     }
 
     function openLightbox({ src, filename, size }) {
@@ -963,94 +927,6 @@
       lightboxImage.src = '';
       lightboxImage.alt = '';
       document.body.style.overflow = '';
-    }
-
-    function layoutItems() {
-      layoutFrame = null;
-      const items = Array.from(contentGrid.querySelectorAll('.item'));
-      const emptyState = contentGrid.querySelector('.empty-state');
-
-      if (emptyState) {
-        contentGrid.style.height = 'auto';
-        return;
-      }
-
-      if (items.length === 0) {
-        contentGrid.style.height = '0px';
-        return;
-      }
-
-      const availableWidth = contentGrid.clientWidth;
-      const columnCount = Math.max(1, Math.floor((availableWidth + masonryGap) / (masonryMinWidth + masonryGap)));
-      const columnWidth = (availableWidth - (columnCount - 1) * masonryGap) / columnCount;
-      const columnHeights = new Array(columnCount).fill(0);
-
-      items.forEach((item) => {
-        item.style.position = 'absolute';
-        item.style.width = `${columnWidth}px`;
-        item.style.left = '0px';
-        item.style.top = '0px';
-      });
-
-      const itemHeights = items.map(item => item.offsetHeight);
-
-      items.forEach((item, index) => {
-        const shortestColumn = columnHeights.indexOf(Math.min(...columnHeights));
-        const x = shortestColumn * (columnWidth + masonryGap);
-        const y = columnHeights[shortestColumn];
-
-        item.style.transform = `translate3d(${x}px, ${y}px, 0)`;
-        columnHeights[shortestColumn] += itemHeights[index] + masonryGap;
-      });
-
-      contentGrid.style.height = `${Math.max(...columnHeights) - masonryGap}px`;
-      scheduleOverflowCheck();
-    }
-
-    let layoutFrame = null;
-    function scheduleLayout() {
-      if (layoutFrame) {
-        cancelAnimationFrame(layoutFrame);
-      }
-      layoutFrame = requestAnimationFrame(layoutItems);
-    }
-
-    let overflowCheckFrame = null;
-    function scheduleOverflowCheck() {
-      if (overflowCheckFrame) {
-        return;
-      }
-
-      overflowCheckFrame = requestAnimationFrame(() => {
-        overflowCheckFrame = null;
-        if (updateExpandableButtons()) {
-          scheduleLayout();
-        }
-      });
-    }
-
-    function updateExpandableButtons() {
-      let layoutChanged = false;
-      const textBlocks = contentGrid.querySelectorAll('.item-text');
-
-      textBlocks.forEach((textContent) => {
-        const actions = textContent.nextElementSibling;
-        const expandBtn = actions ? actions.querySelector('.expand-btn') : null;
-        if (!expandBtn) {
-          return;
-        }
-
-        const shouldShow = textContent.classList.contains('expanded') ||
-          textContent.scrollHeight > textContent.clientHeight + 4;
-        const isVisible = expandBtn.classList.contains('visible');
-
-        if (shouldShow !== isVisible) {
-          expandBtn.classList.toggle('visible', shouldShow);
-          layoutChanged = true;
-        }
-      });
-
-      return layoutChanged;
     }
 
     async function copyText(text, btn) {
@@ -1097,11 +973,11 @@
 
         const expandBtn = document.createElement('button');
         expandBtn.className = 'expand-btn';
+        expandBtn.classList.toggle('visible', shouldShowExpandButton(item.content));
         expandBtn.textContent = '展开全文';
         expandBtn.onclick = () => {
           textContent.classList.toggle('expanded');
           expandBtn.textContent = textContent.classList.contains('expanded') ? '收起内容' : '展开全文';
-          scheduleLayout();
         };
         actions.appendChild(expandBtn);
         itemElement.appendChild(actions);
@@ -1109,42 +985,41 @@
         const fileContent = document.createElement('div');
         fileContent.className = 'item-file';
 
-        if (isImageFile(item.filename)) {
-          const previewWrap = document.createElement('div');
-          previewWrap.className = 'preview-wrap';
+        const fileMeta = document.createElement('div');
+        fileMeta.className = 'file-meta';
 
-          const img = document.createElement('img');
-          img.className = 'file-preview';
-          img.loading = 'lazy';
-          img.decoding = 'async';
-          img.fetchPriority = 'low';
-          img.src = `/preview/${item.filepath}`;
-          img.alt = item.filename;
-          img.onclick = () => openLightbox({
+        const fileName = document.createElement('strong');
+        fileName.textContent = item.filename;
+        fileMeta.appendChild(fileName);
+
+        const fileSize = document.createElement('div');
+        fileSize.textContent = `大小: ${formatSize(item.size)}`;
+        fileMeta.appendChild(fileSize);
+        fileContent.appendChild(fileMeta);
+
+        const fileActions = document.createElement('div');
+        fileActions.className = 'file-actions';
+
+        if (isImageFile(item.filename)) {
+          const previewBtn = document.createElement('button');
+          previewBtn.type = 'button';
+          previewBtn.className = 'image-preview-btn';
+          previewBtn.textContent = '预览图片';
+          previewBtn.onclick = () => openLightbox({
             src: `/preview/${item.filepath}`,
             filename: item.filename,
             size: item.size
           });
-          img.addEventListener('load', scheduleLayout);
-          img.addEventListener('error', scheduleLayout);
-          previewWrap.appendChild(img);
-          fileContent.appendChild(previewWrap);
+          fileActions.appendChild(previewBtn);
         }
-
-        const fileMeta = document.createElement('div');
-        fileMeta.className = 'file-meta';
-        fileMeta.innerHTML = `
-          <strong>${escapeHtml(item.filename)}</strong>
-          <div>大小: ${formatSize(item.size)}</div>
-        `;
-        fileContent.appendChild(fileMeta);
 
         const downloadLink = document.createElement('a');
         downloadLink.href = `/download/${item.filepath}`;
         downloadLink.className = 'file-download';
         downloadLink.download = item.filename;
         downloadLink.textContent = '下载文件';
-        fileContent.appendChild(downloadLink);
+        fileActions.appendChild(downloadLink);
+        fileContent.appendChild(fileActions);
 
         itemElement.appendChild(fileContent);
       }
@@ -1160,13 +1035,7 @@
     function renderTextContent(text) {
       const textContent = document.createElement('div');
       textContent.className = 'item-text';
-
-      text.split('\n').forEach((line) => {
-        const lineElement = document.createElement('div');
-        lineElement.className = 'item-text-line';
-        lineElement.textContent = line || ' ';
-        textContent.appendChild(lineElement);
-      });
+      textContent.textContent = text;
 
       return textContent;
     }
@@ -1255,7 +1124,6 @@
     });
 
     submitTextBtn.addEventListener('click', submitText);
-    window.addEventListener('resize', scheduleLayout);
     lightboxClose.addEventListener('click', closeLightbox);
     lightbox.addEventListener('click', (event) => {
       if (event.target === lightbox) {
