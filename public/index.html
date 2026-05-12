@@ -183,6 +183,7 @@
     }
 
     .logout-btn,
+    .refresh-btn,
     .upload-label,
     .composer-submit,
     .file-download,
@@ -208,6 +209,7 @@
     }
 
     .logout-btn:hover,
+    .refresh-btn:hover,
     .upload-label:hover,
     .composer-submit:hover,
     .file-download:hover,
@@ -338,6 +340,12 @@
       margin-bottom: 18px;
     }
 
+    .toolbar-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
     .toolbar h3 {
       margin: 0;
       font-size: 24px;
@@ -347,6 +355,23 @@
     .toolbar span {
       color: var(--muted);
       font-size: 14px;
+    }
+
+    .refresh-btn {
+      min-height: 46px;
+      padding: 0 16px;
+      border-radius: 16px;
+      background: linear-gradient(135deg, #275f93 0%, #2d78bf 100%);
+      color: white;
+      font-size: 14px;
+      font-weight: 600;
+      white-space: nowrap;
+      box-shadow: 0 10px 20px rgba(45, 120, 191, 0.16);
+    }
+
+    .refresh-btn:disabled {
+      cursor: not-allowed;
+      opacity: 0.62;
     }
 
     .content-grid {
@@ -676,6 +701,11 @@
         flex-direction: column;
       }
 
+      .toolbar-actions,
+      .refresh-btn {
+        width: 100%;
+      }
+
       .item-actions {
         flex-direction: column;
         align-items: stretch;
@@ -782,6 +812,9 @@
         <h3>内容列表</h3>
         <span id="toolbar-summary">正在加载内容...</span>
       </div>
+      <div class="toolbar-actions">
+        <button class="refresh-btn" id="refresh-btn" type="button">刷新列表</button>
+      </div>
     </div>
 
     <div class="content-grid" id="content-grid"></div>
@@ -814,6 +847,7 @@
     const contentGrid = document.getElementById('content-grid');
     const errorMessage = document.getElementById('error-message');
     const toolbarSummary = document.getElementById('toolbar-summary');
+    const refreshBtn = document.getElementById('refresh-btn');
     const statTotal = document.getElementById('stat-total');
     const statText = document.getElementById('stat-text');
     const statFile = document.getElementById('stat-file');
@@ -822,6 +856,8 @@
     const lightboxTitle = document.getElementById('lightbox-title');
     const lightboxSize = document.getElementById('lightbox-size');
     const lightboxClose = document.getElementById('lightbox-close');
+    let isLoadingItems = false;
+    let shouldReloadItems = false;
 
     function showError(message) {
       errorMessage.textContent = message;
@@ -871,8 +907,18 @@
     }
 
     async function loadItems() {
+      if (isLoadingItems) {
+        shouldReloadItems = true;
+        return;
+      }
+
+      isLoadingItems = true;
+      shouldReloadItems = false;
+      refreshBtn.disabled = true;
+      refreshBtn.textContent = '刷新中...';
+
       try {
-        const response = await fetch('/api/items');
+        const response = await fetch('/api/items', { cache: 'no-store' });
         const data = await handleResponse(response);
         if (data) {
           contentGrid.innerHTML = '';
@@ -883,15 +929,21 @@
             contentGrid.innerHTML = '<div class="empty-state">暂无内容。<br>你可以先发送一段文本，或者上传一个文件作为起点。</div>';
           } else {
             const fragment = document.createDocumentFragment();
-            data.slice().reverse().forEach(item => {
+            data.forEach(item => {
               fragment.appendChild(renderItem(item));
             });
             contentGrid.appendChild(fragment);
           }
-
         }
       } catch (error) {
         showError('加载内容失败: ' + error.message);
+      } finally {
+        isLoadingItems = false;
+        refreshBtn.disabled = false;
+        refreshBtn.textContent = '刷新列表';
+        if (shouldReloadItems) {
+          loadItems();
+        }
       }
     }
 
@@ -1124,6 +1176,7 @@
     });
 
     submitTextBtn.addEventListener('click', submitText);
+    refreshBtn.addEventListener('click', loadItems);
     lightboxClose.addEventListener('click', closeLightbox);
     lightbox.addEventListener('click', (event) => {
       if (event.target === lightbox) {

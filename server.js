@@ -246,6 +246,21 @@ function isImageFile(filename) {
   return imageExtensions.has(path.extname(filename).toLowerCase());
 }
 
+function getTimestampMs(item) {
+  const value = Date.parse(item.timestamp);
+  return Number.isNaN(value) ? 0 : value;
+}
+
+function getItemsNewestFirst() {
+  return store.getAll()
+    .map((item, index) => ({ item, index }))
+    .sort((left, right) => {
+      const timeDiff = getTimestampMs(right.item) - getTimestampMs(left.item);
+      return timeDiff || right.index - left.index;
+    })
+    .map(({ item }) => item);
+}
+
 function getFileItemOr404(req, res) {
   const storedFilename = path.basename(req.params.filename || '');
   const item = store.getByStoredFilename(storedFilename);
@@ -341,7 +356,7 @@ app.get('/index.html', checkAuth, (req, res) => {
 
 app.get('/api/items', checkAuth, (req, res) => {
   res.setHeader('Content-Type', 'application/json; charset=utf-8');
-  res.json(store.getAll());
+  res.json(getItemsNewestFirst());
 });
 
 app.post('/api/items/text', checkAuth, (req, res) => {
