@@ -3,12 +3,40 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="light dark">
   <title>文件分享系统</title>
   <link rel="icon" type="image/svg+xml" href="/assets/app-icon.svg">
   <link rel="apple-touch-icon" href="/assets/app-icon.svg">
+  <script>
+    (() => {
+      const themeStorageKey = 'some-transfer:theme-mode';
+      const allowedThemes = new Set(['light', 'dark', 'system']);
+      let themePreference = 'system';
+
+      try {
+        const storedTheme = localStorage.getItem(themeStorageKey);
+        if (allowedThemes.has(storedTheme)) {
+          themePreference = storedTheme;
+        }
+      } catch (error) {
+        themePreference = 'system';
+      }
+
+      const systemPrefersDark = window.matchMedia &&
+        window.matchMedia('(prefers-color-scheme: dark)').matches;
+      const resolvedTheme = themePreference === 'system'
+        ? (systemPrefersDark ? 'dark' : 'light')
+        : themePreference;
+
+      document.documentElement.dataset.theme = resolvedTheme;
+      document.documentElement.dataset.themePreference = themePreference;
+    })();
+  </script>
   <style>
     :root {
+      color-scheme: light;
       --bg: #f4efe8;
+      --page-bg: linear-gradient(145deg, #f7f1e8 0%, #eee7de 52%, #ebe6de 100%);
       --panel: rgba(255, 251, 245, 0.94);
       --panel-strong: rgba(255, 255, 255, 0.96);
       --line: rgba(102, 83, 57, 0.12);
@@ -19,6 +47,24 @@
       --danger: #c94635;
       --danger-deep: #9d301f;
       --blue: #2d78bf;
+      --green: #2f7c4b;
+      --chip-bg: rgba(255, 255, 255, 0.72);
+      --chip-border: rgba(102, 83, 57, 0.08);
+      --field-bg: rgba(255, 255, 255, 0.84);
+      --field-border: rgba(102, 83, 57, 0.12);
+      --soft-surface: rgba(255, 255, 255, 0.62);
+      --soft-button: rgba(29, 27, 24, 0.08);
+      --soft-button-hover: rgba(29, 27, 24, 0.12);
+      --modal-surface: rgba(255, 251, 245, 0.96);
+      --modal-border: rgba(255, 255, 255, 0.36);
+      --modal-close-bg: rgba(29, 27, 24, 0.08);
+      --modal-close-hover: rgba(29, 27, 24, 0.14);
+      --overlay-bg: rgba(29, 27, 24, 0.74);
+      --confirm-overlay-bg: rgba(29, 27, 24, 0.72);
+      --image-wrap-bg: linear-gradient(135deg, rgba(247, 241, 232, 0.96), rgba(236, 229, 221, 0.92));
+      --empty-bg: rgba(255, 255, 255, 0.66);
+      --empty-border: rgba(102, 83, 57, 0.16);
+      --error-text: #8f2619;
       --shadow-lg: 0 18px 42px rgba(60, 41, 24, 0.1);
       --shadow-md: 0 10px 24px rgba(60, 41, 24, 0.08);
       --item-surface: rgba(255, 252, 247, 0.96);
@@ -26,6 +72,44 @@
       --radius-xl: 28px;
       --radius-lg: 22px;
       --radius-md: 18px;
+    }
+
+    :root[data-theme="dark"] {
+      color-scheme: dark;
+      --bg: #111312;
+      --page-bg: linear-gradient(145deg, #101312 0%, #171917 50%, #20201c 100%);
+      --panel: rgba(29, 31, 29, 0.94);
+      --panel-strong: rgba(36, 38, 35, 0.96);
+      --line: rgba(235, 226, 214, 0.14);
+      --text: #f4eee6;
+      --muted: #bdb3a6;
+      --accent: #e08a51;
+      --accent-deep: #b96736;
+      --danger: #df6958;
+      --danger-deep: #b84433;
+      --blue: #7bb7f0;
+      --green: #79c995;
+      --chip-bg: rgba(255, 255, 255, 0.07);
+      --chip-border: rgba(235, 226, 214, 0.1);
+      --field-bg: rgba(255, 255, 255, 0.08);
+      --field-border: rgba(235, 226, 214, 0.14);
+      --soft-surface: rgba(255, 255, 255, 0.08);
+      --soft-button: rgba(255, 255, 255, 0.08);
+      --soft-button-hover: rgba(255, 255, 255, 0.13);
+      --modal-surface: rgba(28, 30, 28, 0.98);
+      --modal-border: rgba(235, 226, 214, 0.14);
+      --modal-close-bg: rgba(255, 255, 255, 0.1);
+      --modal-close-hover: rgba(255, 255, 255, 0.16);
+      --overlay-bg: rgba(5, 6, 6, 0.78);
+      --confirm-overlay-bg: rgba(5, 6, 6, 0.76);
+      --image-wrap-bg: linear-gradient(135deg, rgba(18, 20, 19, 0.96), rgba(35, 34, 30, 0.92));
+      --empty-bg: rgba(255, 255, 255, 0.06);
+      --empty-border: rgba(235, 226, 214, 0.18);
+      --error-text: #ffb2a5;
+      --shadow-lg: 0 18px 42px rgba(0, 0, 0, 0.34);
+      --shadow-md: 0 10px 24px rgba(0, 0, 0, 0.28);
+      --item-surface: rgba(31, 33, 31, 0.96);
+      --item-shadow: 0 6px 18px rgba(0, 0, 0, 0.24);
     }
 
     * {
@@ -37,7 +121,7 @@
       min-height: 100vh;
       font-family: "Avenir Next", "PingFang SC", "Noto Sans SC", sans-serif;
       color: var(--text);
-      background: linear-gradient(145deg, #f7f1e8 0%, #eee7de 52%, #ebe6de 100%);
+      background: var(--page-bg);
       padding: 24px;
     }
 
@@ -80,8 +164,8 @@
       gap: 10px;
       padding: 10px 14px;
       border-radius: 999px;
-      background: rgba(255, 255, 255, 0.68);
-      border: 1px solid rgba(102, 83, 57, 0.1);
+      background: var(--chip-bg);
+      border: 1px solid var(--chip-border);
       color: var(--muted);
       font-size: 13px;
       letter-spacing: 0.08em;
@@ -129,8 +213,8 @@
       gap: 10px;
       padding: 12px 16px;
       border-radius: 999px;
-      background: rgba(255, 255, 255, 0.72);
-      border: 1px solid rgba(102, 83, 57, 0.08);
+      background: var(--chip-bg);
+      border: 1px solid var(--chip-border);
       color: var(--muted);
       font-size: 14px;
     }
@@ -166,8 +250,8 @@
     .stat {
       padding: 16px;
       border-radius: 20px;
-      background: rgba(255, 255, 255, 0.72);
-      border: 1px solid rgba(102, 83, 57, 0.08);
+      background: var(--chip-bg);
+      border: 1px solid var(--chip-border);
     }
 
     .stat strong {
@@ -207,6 +291,48 @@
       box-shadow: 0 10px 20px rgba(157, 48, 31, 0.16);
       font-size: 14px;
       font-weight: 600;
+    }
+
+    .status-actions {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .theme-switcher {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 4px;
+      border-radius: 16px;
+      background: var(--soft-surface);
+      border: 1px solid var(--line);
+    }
+
+    .theme-option {
+      min-height: 34px;
+      padding: 0 12px;
+      border: none;
+      border-radius: 12px;
+      background: transparent;
+      color: var(--muted);
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 600;
+      white-space: nowrap;
+      transition: background 0.16s ease, color 0.16s ease, box-shadow 0.16s ease;
+    }
+
+    .theme-option:hover {
+      color: var(--text);
+    }
+
+    .theme-option.active {
+      background: var(--panel-strong);
+      color: var(--text);
+      box-shadow: var(--item-shadow);
     }
 
     .logout-btn:hover,
@@ -264,8 +390,8 @@
       height: 136px;
       padding: 16px 18px;
       border-radius: 20px;
-      border: 1px solid rgba(102, 83, 57, 0.12);
-      background: rgba(255, 255, 255, 0.84);
+      border: 1px solid var(--field-border);
+      background: var(--field-bg);
       color: var(--text);
       font-size: 16px;
       line-height: 1.8;
@@ -330,7 +456,7 @@
       border-radius: 18px;
       background: rgba(201, 70, 53, 0.12);
       border: 1px solid rgba(201, 70, 53, 0.16);
-      color: #8f2619;
+      color: var(--error-text);
       display: none;
     }
 
@@ -428,7 +554,7 @@
       margin-bottom: 16px;
       padding: 8px 12px;
       border-radius: 999px;
-      background: rgba(255, 255, 255, 0.7);
+      background: var(--chip-bg);
       color: var(--muted);
       font-size: 12px;
       text-transform: uppercase;
@@ -473,7 +599,7 @@
 
     .copy-btn.copied {
       background: rgba(72, 160, 106, 0.15);
-      color: #2f7c4b;
+      color: var(--green);
     }
 
     .copy-btn:disabled {
@@ -514,7 +640,7 @@
       align-items: center;
       justify-content: center;
       padding: 28px;
-      background: rgba(29, 27, 24, 0.74);
+      background: var(--overlay-bg);
       opacity: 0;
       pointer-events: none;
       transition: opacity 0.16s ease;
@@ -531,8 +657,8 @@
       max-height: 100%;
       padding: 18px 18px 14px;
       border-radius: 28px;
-      background: rgba(255, 251, 245, 0.96);
-      border: 1px solid rgba(255, 255, 255, 0.36);
+      background: var(--modal-surface);
+      border: 1px solid var(--modal-border);
       box-shadow: 0 18px 48px rgba(0, 0, 0, 0.2);
       display: flex;
       flex-direction: column;
@@ -547,7 +673,7 @@
       height: 42px;
       border: none;
       border-radius: 999px;
-      background: rgba(29, 27, 24, 0.08);
+      background: var(--modal-close-bg);
       color: var(--text);
       font-size: 24px;
       line-height: 1;
@@ -556,7 +682,7 @@
     }
 
     .lightbox-close:hover {
-      background: rgba(29, 27, 24, 0.14);
+      background: var(--modal-close-hover);
     }
 
     .lightbox-figure {
@@ -572,8 +698,7 @@
       max-height: calc(100vh - 170px);
       border-radius: 22px;
       overflow: hidden;
-      background:
-        linear-gradient(135deg, rgba(247, 241, 232, 0.96), rgba(236, 229, 221, 0.92));
+      background: var(--image-wrap-bg);
       display: grid;
       place-items: center;
     }
@@ -615,7 +740,7 @@
       align-items: center;
       justify-content: center;
       padding: 24px;
-      background: rgba(29, 27, 24, 0.72);
+      background: var(--confirm-overlay-bg);
       opacity: 0;
       pointer-events: none;
       transition: opacity 0.16s ease;
@@ -630,8 +755,8 @@
       width: min(100%, 560px);
       padding: 26px;
       border-radius: 28px;
-      background: rgba(255, 251, 245, 0.98);
-      border: 1px solid rgba(255, 255, 255, 0.36);
+      background: var(--modal-surface);
+      border: 1px solid var(--modal-border);
       box-shadow: 0 18px 48px rgba(0, 0, 0, 0.22);
       position: relative;
     }
@@ -674,12 +799,12 @@
     }
 
     .confirm-cancel {
-      background: rgba(29, 27, 24, 0.08);
+      background: var(--soft-button);
       color: var(--text);
     }
 
     .confirm-cancel:hover {
-      background: rgba(29, 27, 24, 0.12);
+      background: var(--soft-button-hover);
     }
 
     .confirm-danger {
@@ -700,7 +825,7 @@
       height: 38px;
       border: none;
       border-radius: 999px;
-      background: rgba(29, 27, 24, 0.08);
+      background: var(--modal-close-bg);
       color: var(--text);
       font-size: 22px;
       line-height: 1;
@@ -709,7 +834,7 @@
     }
 
     .confirm-close:hover {
-      background: rgba(29, 27, 24, 0.14);
+      background: var(--modal-close-hover);
     }
 
     .file-meta {
@@ -766,8 +891,8 @@
       break-inside: avoid;
       text-align: center;
       border-radius: 28px;
-      background: rgba(255, 255, 255, 0.66);
-      border: 1px dashed rgba(102, 83, 57, 0.16);
+      background: var(--empty-bg);
+      border: 1px dashed var(--empty-border);
       color: var(--muted);
       line-height: 1.8;
     }
@@ -834,6 +959,17 @@
       .refresh-btn,
       .clear-btn {
         width: 100%;
+      }
+
+      .status-actions,
+      .theme-switcher,
+      .logout-btn {
+        width: 100%;
+      }
+
+      .theme-option {
+        flex: 1;
+        padding: 0 8px;
       }
 
       .item-actions {
@@ -910,7 +1046,14 @@
             </div>
           </div>
         </div>
-        <button class="logout-btn" onclick="logout()">退出登录</button>
+        <div class="status-actions">
+          <div class="theme-switcher" role="group" aria-label="外观模式">
+            <button class="theme-option" type="button" data-theme-option="light" aria-pressed="false">浅色</button>
+            <button class="theme-option" type="button" data-theme-option="dark" aria-pressed="false">深色</button>
+            <button class="theme-option" type="button" data-theme-option="system" aria-pressed="false">跟随系统</button>
+          </div>
+          <button class="logout-btn" onclick="logout()">退出登录</button>
+        </div>
       </aside>
     </section>
 
@@ -1004,6 +1147,12 @@
     const clearModalClose = document.getElementById('clear-modal-close');
     const clearModalCancel = document.getElementById('clear-modal-cancel');
     const clearModalConfirm = document.getElementById('clear-modal-confirm');
+    const themeButtons = document.querySelectorAll('[data-theme-option]');
+    const themeStorageKey = 'some-transfer:theme-mode';
+    const themeMediaQuery = window.matchMedia
+      ? window.matchMedia('(prefers-color-scheme: dark)')
+      : { matches: false, addEventListener() {} };
+    const allowedThemes = new Set(['light', 'dark', 'system']);
     const textCryptoSecretStorageKey = 'some-transfer:text-crypto-secret';
     const textCryptoSecretLocalStorageKey = 'some-transfer:text-crypto-secret:v2';
     const encryptedTextPrefix = 'stenc:v1:';
@@ -1018,6 +1167,67 @@
     let pendingTextCryptoSecret = '';
     let clearModalReturnFocus = null;
     let isClearingItems = false;
+
+    function getStoredThemePreference() {
+      try {
+        const storedTheme = localStorage.getItem(themeStorageKey);
+        return allowedThemes.has(storedTheme) ? storedTheme : 'system';
+      } catch (error) {
+        return 'system';
+      }
+    }
+
+    function resolveThemePreference(preference) {
+      if (preference === 'system') {
+        return themeMediaQuery.matches ? 'dark' : 'light';
+      }
+
+      return preference;
+    }
+
+    function applyThemePreference(preference) {
+      const nextPreference = allowedThemes.has(preference) ? preference : 'system';
+      document.documentElement.dataset.themePreference = nextPreference;
+      document.documentElement.dataset.theme = resolveThemePreference(nextPreference);
+
+      themeButtons.forEach((button) => {
+        const isActive = button.dataset.themeOption === nextPreference;
+        button.classList.toggle('active', isActive);
+        button.setAttribute('aria-pressed', String(isActive));
+      });
+    }
+
+    function setThemePreference(preference) {
+      const nextPreference = allowedThemes.has(preference) ? preference : 'system';
+      try {
+        localStorage.setItem(themeStorageKey, nextPreference);
+      } catch (error) {
+        // Ignore storage failures and still apply the current-page theme.
+      }
+      applyThemePreference(nextPreference);
+    }
+
+    function initializeThemeControls() {
+      applyThemePreference(getStoredThemePreference());
+
+      themeButtons.forEach((button) => {
+        button.addEventListener('click', () => {
+          setThemePreference(button.dataset.themeOption);
+        });
+      });
+
+      const handleSystemThemeChange = () => {
+        if (getStoredThemePreference() === 'system') {
+          applyThemePreference('system');
+        }
+      };
+
+      if (typeof themeMediaQuery.addEventListener === 'function') {
+        themeMediaQuery.addEventListener('change', handleSystemThemeChange);
+      } else if (typeof themeMediaQuery.addListener === 'function') {
+        themeMediaQuery.addListener(handleSystemThemeChange);
+      }
+    }
 
     function showError(message) {
       errorMessage.textContent = message;
@@ -1601,6 +1811,7 @@
       }
     });
 
+    initializeThemeControls();
     loadItems();
   </script>
 </body>

@@ -3,20 +3,75 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="light dark">
   <title>文件分享系统 - 登录</title>
   <link rel="icon" type="image/svg+xml" href="/assets/app-icon.svg">
   <link rel="apple-touch-icon" href="/assets/app-icon.svg">
+  <script>
+    (() => {
+      const themeStorageKey = 'some-transfer:theme-mode';
+      const allowedThemes = new Set(['light', 'dark', 'system']);
+      let themePreference = 'system';
+
+      try {
+        const storedTheme = localStorage.getItem(themeStorageKey);
+        if (allowedThemes.has(storedTheme)) {
+          themePreference = storedTheme;
+        }
+      } catch (error) {
+        themePreference = 'system';
+      }
+
+      const systemPrefersDark = window.matchMedia &&
+        window.matchMedia('(prefers-color-scheme: dark)').matches;
+      const resolvedTheme = themePreference === 'system'
+        ? (systemPrefersDark ? 'dark' : 'light')
+        : themePreference;
+
+      document.documentElement.dataset.theme = resolvedTheme;
+      document.documentElement.dataset.themePreference = themePreference;
+    })();
+  </script>
   <style>
     :root {
+      color-scheme: light;
       --bg: #f3efe7;
+      --page-bg: linear-gradient(135deg, #f8f3eb 0%, #efe8de 48%, #e9e4dc 100%);
       --panel: rgba(255, 251, 245, 0.96);
       --panel-border: rgba(112, 89, 56, 0.14);
+      --panel-strong: rgba(255, 255, 255, 0.9);
       --text: #1d1b18;
       --muted: #6c655c;
       --accent: #c96f3b;
       --accent-strong: #ab5422;
+      --chip-bg: rgba(255, 255, 255, 0.62);
+      --chip-border: rgba(112, 89, 56, 0.1);
+      --field-bg: rgba(255, 255, 255, 0.9);
+      --field-border: rgba(112, 89, 56, 0.14);
+      --soft-surface: rgba(255, 255, 255, 0.62);
+      --error-text: #b53920;
       --shadow: 0 16px 40px rgba(61, 42, 22, 0.1);
       --radius: 28px;
+    }
+
+    :root[data-theme="dark"] {
+      color-scheme: dark;
+      --bg: #111312;
+      --page-bg: linear-gradient(135deg, #101312 0%, #171917 48%, #20201c 100%);
+      --panel: rgba(29, 31, 29, 0.96);
+      --panel-border: rgba(235, 226, 214, 0.14);
+      --panel-strong: rgba(36, 38, 35, 0.92);
+      --text: #f4eee6;
+      --muted: #bdb3a6;
+      --accent: #e08a51;
+      --accent-strong: #b96736;
+      --chip-bg: rgba(255, 255, 255, 0.07);
+      --chip-border: rgba(235, 226, 214, 0.1);
+      --field-bg: rgba(255, 255, 255, 0.08);
+      --field-border: rgba(235, 226, 214, 0.14);
+      --soft-surface: rgba(255, 255, 255, 0.08);
+      --error-text: #ffb2a5;
+      --shadow: 0 16px 40px rgba(0, 0, 0, 0.34);
     }
 
     * {
@@ -33,7 +88,7 @@
       justify-content: center;
       font-family: "Avenir Next", "PingFang SC", "Noto Sans SC", sans-serif;
       color: var(--text);
-      background: linear-gradient(135deg, #f8f3eb 0%, #efe8de 48%, #e9e4dc 100%);
+      background: var(--page-bg);
       padding: 24px;
     }
 
@@ -72,8 +127,8 @@
       width: fit-content;
       padding: 10px 14px;
       border-radius: 999px;
-      background: rgba(255, 255, 255, 0.62);
-      border: 1px solid rgba(112, 89, 56, 0.1);
+      background: var(--chip-bg);
+      border: 1px solid var(--chip-border);
       color: var(--muted);
       font-size: 13px;
       letter-spacing: 0.08em;
@@ -118,8 +173,8 @@
     .feature {
       padding: 18px;
       border-radius: 22px;
-      background: rgba(255, 255, 255, 0.62);
-      border: 1px solid rgba(112, 89, 56, 0.08);
+      background: var(--chip-bg);
+      border: 1px solid var(--chip-border);
     }
 
     .feature strong {
@@ -148,8 +203,8 @@
       width: min(420px, 100%);
       padding: 34px;
       border-radius: 26px;
-      background: rgba(255, 255, 255, 0.8);
-      border: 1px solid rgba(112, 89, 56, 0.08);
+      background: var(--panel-strong);
+      border: 1px solid var(--chip-border);
       box-shadow: 0 10px 24px rgba(61, 42, 22, 0.08);
     }
 
@@ -180,8 +235,8 @@
       width: 100%;
       padding: 16px 18px;
       border-radius: 18px;
-      border: 1px solid rgba(112, 89, 56, 0.14);
-      background: rgba(255, 255, 255, 0.9);
+      border: 1px solid var(--field-border);
+      background: var(--field-bg);
       font-size: 16px;
       color: var(--text);
       transition: border-color 0.16s ease, box-shadow 0.16s ease;
@@ -223,17 +278,63 @@
     .error {
       min-height: 24px;
       margin-top: 16px;
-      color: #b53920;
+      color: var(--error-text);
       font-size: 14px;
     }
 
     .helper {
       margin-top: 22px;
       padding-top: 18px;
-      border-top: 1px solid rgba(112, 89, 56, 0.1);
+      border-top: 1px solid var(--chip-border);
       color: var(--muted);
       font-size: 13px;
       line-height: 1.7;
+    }
+
+    .theme-switcher {
+      position: absolute;
+      top: 24px;
+      right: 24px;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 4px;
+      border-radius: 16px;
+      background: var(--soft-surface);
+      border: 1px solid var(--panel-border);
+      z-index: 2;
+    }
+
+    .theme-option {
+      width: auto;
+      min-height: 34px;
+      padding: 0 12px;
+      border: none;
+      border-radius: 12px;
+      background: transparent;
+      box-shadow: none;
+      color: var(--muted);
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 600;
+      white-space: nowrap;
+      transition: background 0.16s ease, color 0.16s ease, box-shadow 0.16s ease;
+    }
+
+    .theme-option:hover {
+      color: var(--text);
+      box-shadow: none;
+    }
+
+    .theme-option:active {
+      box-shadow: none;
+    }
+
+    .theme-option.active {
+      background: var(--panel-strong);
+      color: var(--text);
+      box-shadow: 0 6px 16px rgba(61, 42, 22, 0.08);
     }
 
     @media (max-width: 920px) {
@@ -269,6 +370,17 @@
         padding: 24px;
       }
 
+      .theme-switcher {
+        position: static;
+        width: 100%;
+        margin-bottom: 22px;
+      }
+
+      .theme-option {
+        flex: 1;
+        padding: 0 8px;
+      }
+
       .feature-list {
         grid-template-columns: 1fr;
       }
@@ -291,6 +403,11 @@
 <body>
   <main class="page-shell">
     <section class="intro-panel">
+      <div class="theme-switcher" role="group" aria-label="外观模式">
+        <button class="theme-option" type="button" data-theme-option="light" aria-pressed="false">浅色</button>
+        <button class="theme-option" type="button" data-theme-option="dark" aria-pressed="false">深色</button>
+        <button class="theme-option" type="button" data-theme-option="system" aria-pressed="false">跟随系统</button>
+      </div>
       <div>
         <div class="brand-row">
           <div class="eyebrow">Private Transfer Hub</div>
@@ -346,8 +463,77 @@
     const form = document.getElementById('login-form');
     const errorMessage = document.getElementById('error-message');
     const submitButton = form.querySelector('button');
+    const themeButtons = document.querySelectorAll('[data-theme-option]');
+    const themeStorageKey = 'some-transfer:theme-mode';
+    const themeMediaQuery = window.matchMedia
+      ? window.matchMedia('(prefers-color-scheme: dark)')
+      : { matches: false, addEventListener() {} };
+    const allowedThemes = new Set(['light', 'dark', 'system']);
     const textCryptoSecretStorageKey = 'some-transfer:text-crypto-secret';
     const textCryptoSecretLocalStorageKey = 'some-transfer:text-crypto-secret:v2';
+
+    function getStoredThemePreference() {
+      try {
+        const storedTheme = localStorage.getItem(themeStorageKey);
+        return allowedThemes.has(storedTheme) ? storedTheme : 'system';
+      } catch (error) {
+        return 'system';
+      }
+    }
+
+    function resolveThemePreference(preference) {
+      if (preference === 'system') {
+        return themeMediaQuery.matches ? 'dark' : 'light';
+      }
+
+      return preference;
+    }
+
+    function applyThemePreference(preference) {
+      const nextPreference = allowedThemes.has(preference) ? preference : 'system';
+      document.documentElement.dataset.themePreference = nextPreference;
+      document.documentElement.dataset.theme = resolveThemePreference(nextPreference);
+
+      themeButtons.forEach((button) => {
+        const isActive = button.dataset.themeOption === nextPreference;
+        button.classList.toggle('active', isActive);
+        button.setAttribute('aria-pressed', String(isActive));
+      });
+    }
+
+    function setThemePreference(preference) {
+      const nextPreference = allowedThemes.has(preference) ? preference : 'system';
+      try {
+        localStorage.setItem(themeStorageKey, nextPreference);
+      } catch (error) {
+        // Ignore storage failures and still apply the current-page theme.
+      }
+      applyThemePreference(nextPreference);
+    }
+
+    function initializeThemeControls() {
+      applyThemePreference(getStoredThemePreference());
+
+      themeButtons.forEach((button) => {
+        button.addEventListener('click', () => {
+          setThemePreference(button.dataset.themeOption);
+        });
+      });
+
+      const handleSystemThemeChange = () => {
+        if (getStoredThemePreference() === 'system') {
+          applyThemePreference('system');
+        }
+      };
+
+      if (typeof themeMediaQuery.addEventListener === 'function') {
+        themeMediaQuery.addEventListener('change', handleSystemThemeChange);
+      } else if (typeof themeMediaQuery.addListener === 'function') {
+        themeMediaQuery.addListener(handleSystemThemeChange);
+      }
+    }
+
+    initializeThemeControls();
 
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
