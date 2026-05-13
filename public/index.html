@@ -183,6 +183,7 @@
     }
 
     .logout-btn,
+    .clear-btn,
     .refresh-btn,
     .upload-label,
     .composer-submit,
@@ -209,6 +210,7 @@
     }
 
     .logout-btn:hover,
+    .clear-btn:hover,
     .refresh-btn:hover,
     .upload-label:hover,
     .composer-submit:hover,
@@ -369,7 +371,24 @@
       box-shadow: 0 10px 20px rgba(45, 120, 191, 0.16);
     }
 
+    .clear-btn {
+      min-height: 46px;
+      padding: 0 16px;
+      border-radius: 16px;
+      color: white;
+      background: linear-gradient(135deg, var(--danger) 0%, var(--danger-deep) 100%);
+      box-shadow: 0 10px 20px rgba(157, 48, 31, 0.16);
+      font-size: 14px;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
     .refresh-btn:disabled {
+      cursor: not-allowed;
+      opacity: 0.62;
+    }
+
+    .clear-btn:disabled {
       cursor: not-allowed;
       opacity: 0.62;
     }
@@ -455,6 +474,11 @@
     .copy-btn.copied {
       background: rgba(72, 160, 106, 0.15);
       color: #2f7c4b;
+    }
+
+    .copy-btn:disabled {
+      cursor: wait;
+      opacity: 0.62;
     }
 
     .expand-btn {
@@ -583,6 +607,111 @@
       white-space: nowrap;
     }
 
+    .confirm-modal {
+      position: fixed;
+      inset: 0;
+      z-index: 1100;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      background: rgba(29, 27, 24, 0.72);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.16s ease;
+    }
+
+    .confirm-modal.visible {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .confirm-panel {
+      width: min(100%, 560px);
+      padding: 26px;
+      border-radius: 28px;
+      background: rgba(255, 251, 245, 0.98);
+      border: 1px solid rgba(255, 255, 255, 0.36);
+      box-shadow: 0 18px 48px rgba(0, 0, 0, 0.22);
+      position: relative;
+    }
+
+    .confirm-title {
+      margin: 0 0 10px;
+      font-size: 24px;
+      letter-spacing: -0.04em;
+    }
+
+    .confirm-body {
+      margin: 0;
+      color: var(--muted);
+      font-size: 15px;
+      line-height: 1.8;
+    }
+
+    .confirm-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 12px;
+      margin-top: 22px;
+    }
+
+    .confirm-btn {
+      min-height: 46px;
+      padding: 0 16px;
+      border: none;
+      border-radius: 16px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: box-shadow 0.16s ease, opacity 0.16s ease, background 0.16s ease;
+      font-family: inherit;
+    }
+
+    .confirm-btn:disabled {
+      opacity: 0.62;
+      cursor: not-allowed;
+    }
+
+    .confirm-cancel {
+      background: rgba(29, 27, 24, 0.08);
+      color: var(--text);
+    }
+
+    .confirm-cancel:hover {
+      background: rgba(29, 27, 24, 0.12);
+    }
+
+    .confirm-danger {
+      color: white;
+      background: linear-gradient(135deg, var(--danger) 0%, var(--danger-deep) 100%);
+      box-shadow: 0 10px 20px rgba(157, 48, 31, 0.16);
+    }
+
+    .confirm-danger:hover {
+      box-shadow: 0 14px 28px rgba(157, 48, 31, 0.22);
+    }
+
+    .confirm-close {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      width: 38px;
+      height: 38px;
+      border: none;
+      border-radius: 999px;
+      background: rgba(29, 27, 24, 0.08);
+      color: var(--text);
+      font-size: 22px;
+      line-height: 1;
+      cursor: pointer;
+      transition: background 0.16s ease;
+    }
+
+    .confirm-close:hover {
+      background: rgba(29, 27, 24, 0.14);
+    }
+
     .file-meta {
       display: grid;
       gap: 8px;
@@ -702,7 +831,8 @@
       }
 
       .toolbar-actions,
-      .refresh-btn {
+      .refresh-btn,
+      .clear-btn {
         width: 100%;
       }
 
@@ -814,6 +944,7 @@
       </div>
       <div class="toolbar-actions">
         <button class="refresh-btn" id="refresh-btn" type="button">刷新列表</button>
+        <button class="clear-btn" id="clear-btn" type="button">清空列表</button>
       </div>
     </div>
 
@@ -838,6 +969,18 @@
     </div>
   </div>
 
+  <div class="confirm-modal" id="clear-modal" aria-hidden="true">
+    <div class="confirm-panel" role="dialog" aria-modal="true" aria-labelledby="clear-modal-title" aria-describedby="clear-modal-body">
+      <button class="confirm-close" id="clear-modal-close" type="button" aria-label="关闭确认弹窗">&times;</button>
+      <h2 class="confirm-title" id="clear-modal-title">清空内容列表</h2>
+      <p class="confirm-body" id="clear-modal-body">是否清空内容列表？清空后所有文本和文件都会被删除，无法恢复。</p>
+      <div class="confirm-actions">
+        <button class="confirm-btn confirm-cancel" id="clear-modal-cancel" type="button">取消</button>
+        <button class="confirm-btn confirm-danger" id="clear-modal-confirm" type="button">确定清空</button>
+      </div>
+    </div>
+  </div>
+
   <script>
     const textInput = document.querySelector('.text-input');
     const fileInput = document.getElementById('file-input');
@@ -848,6 +991,7 @@
     const errorMessage = document.getElementById('error-message');
     const toolbarSummary = document.getElementById('toolbar-summary');
     const refreshBtn = document.getElementById('refresh-btn');
+    const clearBtn = document.getElementById('clear-btn');
     const statTotal = document.getElementById('stat-total');
     const statText = document.getElementById('stat-text');
     const statFile = document.getElementById('stat-file');
@@ -856,8 +1000,24 @@
     const lightboxTitle = document.getElementById('lightbox-title');
     const lightboxSize = document.getElementById('lightbox-size');
     const lightboxClose = document.getElementById('lightbox-close');
+    const clearModal = document.getElementById('clear-modal');
+    const clearModalClose = document.getElementById('clear-modal-close');
+    const clearModalCancel = document.getElementById('clear-modal-cancel');
+    const clearModalConfirm = document.getElementById('clear-modal-confirm');
+    const textCryptoSecretStorageKey = 'some-transfer:text-crypto-secret';
+    const textCryptoSecretLocalStorageKey = 'some-transfer:text-crypto-secret:v2';
+    const encryptedTextPrefix = 'stenc:v1:';
+    const encryptedTextSalt = 'some-transfer:text-encryption:v1';
+    const encryptedTextIterations = 150000;
+    const maxPlainTextLength = 10000;
     let isLoadingItems = false;
     let shouldReloadItems = false;
+    let textCryptoKey = null;
+    let textCryptoKeyPromise = null;
+    let textCryptoSecret = '';
+    let pendingTextCryptoSecret = '';
+    let clearModalReturnFocus = null;
+    let isClearingItems = false;
 
     function showError(message) {
       errorMessage.textContent = message;
@@ -880,6 +1040,138 @@
       return response.json();
     }
 
+    function readStoredTextCryptoSecret() {
+      const sessionSecret = sessionStorage.getItem(textCryptoSecretStorageKey) || '';
+      if (sessionSecret) {
+        return sessionSecret;
+      }
+
+      const localSecret = localStorage.getItem(textCryptoSecretLocalStorageKey) || '';
+      if (localSecret) {
+        sessionStorage.setItem(textCryptoSecretStorageKey, localSecret);
+      }
+
+      return localSecret;
+    }
+
+    function getTextCryptoSecret() {
+      return readStoredTextCryptoSecret();
+    }
+
+    function clearTextCryptoSecret() {
+      sessionStorage.removeItem(textCryptoSecretStorageKey);
+      localStorage.removeItem(textCryptoSecretLocalStorageKey);
+      textCryptoKey = null;
+      textCryptoKeyPromise = null;
+      textCryptoSecret = '';
+      pendingTextCryptoSecret = '';
+    }
+
+    function ensureTextCryptoSupport() {
+      if (!window.crypto || !window.crypto.subtle) {
+        throw new Error('当前浏览器环境不支持文本加密，请使用 HTTPS 或 localhost 访问');
+      }
+    }
+
+    async function getTextCryptoKey() {
+      ensureTextCryptoSupport();
+
+      const secret = getTextCryptoSecret();
+      if (!secret) {
+        throw new Error('缺少 Pin 码，请先重新登录');
+      }
+
+      if (textCryptoKey && textCryptoSecret === secret) {
+        return textCryptoKey;
+      }
+
+      if (textCryptoKeyPromise && pendingTextCryptoSecret === secret) {
+        return textCryptoKeyPromise;
+      }
+
+      const encoder = new TextEncoder();
+      pendingTextCryptoSecret = secret;
+      textCryptoKeyPromise = (async () => {
+        const baseKey = await crypto.subtle.importKey(
+          'raw',
+          encoder.encode(secret),
+          'PBKDF2',
+          false,
+          ['deriveKey']
+        );
+
+        const derivedKey = await crypto.subtle.deriveKey(
+          {
+            name: 'PBKDF2',
+            salt: encoder.encode(encryptedTextSalt),
+            iterations: encryptedTextIterations,
+            hash: 'SHA-256'
+          },
+          baseKey,
+          { name: 'AES-GCM', length: 256 },
+          false,
+          ['encrypt', 'decrypt']
+        );
+
+        textCryptoKey = derivedKey;
+        textCryptoSecret = secret;
+        return derivedKey;
+      })();
+
+      try {
+        return await textCryptoKeyPromise;
+      } finally {
+        if (pendingTextCryptoSecret === secret) {
+          pendingTextCryptoSecret = '';
+          textCryptoKeyPromise = null;
+        }
+      }
+    }
+
+    function bytesToBase64Url(bytes) {
+      const chunkSize = 0x8000;
+      let binary = '';
+      for (let index = 0; index < bytes.length; index += chunkSize) {
+        binary += String.fromCharCode(...bytes.subarray(index, index + chunkSize));
+      }
+      return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/g, '');
+    }
+
+    function base64UrlToBytes(value) {
+      const base64 = value.replace(/-/g, '+').replace(/_/g, '/').padEnd(Math.ceil(value.length / 4) * 4, '=');
+      const binary = atob(base64);
+      const bytes = new Uint8Array(binary.length);
+      for (let index = 0; index < binary.length; index += 1) {
+        bytes[index] = binary.charCodeAt(index);
+      }
+      return bytes;
+    }
+
+    function isEncryptedText(content) {
+      return typeof content === 'string' && content.startsWith(encryptedTextPrefix);
+    }
+
+    async function encryptTextContent(text) {
+      const key = await getTextCryptoKey();
+      const iv = crypto.getRandomValues(new Uint8Array(12));
+      const plaintext = new TextEncoder().encode(text);
+      const encrypted = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, plaintext);
+      return `${encryptedTextPrefix}${bytesToBase64Url(iv)}:${bytesToBase64Url(new Uint8Array(encrypted))}`;
+    }
+
+    async function decryptTextContent(content) {
+      const parts = content.split(':');
+      if (parts.length !== 4 || parts[0] !== 'stenc' || parts[1] !== 'v1') {
+        throw new Error('加密文本格式无效');
+      }
+
+      const key = await getTextCryptoKey();
+      const iv = base64UrlToBytes(parts[2]);
+      const ciphertext = base64UrlToBytes(parts[3]);
+      const decrypted = await crypto.subtle.decrypt({ name: 'AES-GCM', iv }, key, ciphertext);
+      return new TextDecoder().decode(decrypted);
+    }
+
     function updateStats(items) {
       const textCount = items.filter(item => item.type === 'text').length;
       const fileCount = items.filter(item => item.type === 'file').length;
@@ -899,6 +1191,7 @@
       try {
         const response = await fetch('/logout', { method: 'POST' });
         if (response.ok) {
+          clearTextCryptoSecret();
           window.location.href = '/';
         }
       } catch (error) {
@@ -947,6 +1240,48 @@
       }
     }
 
+    async function clearItems() {
+      if (isClearingItems) {
+        return;
+      }
+
+      openClearModal();
+    }
+
+    async function confirmClearItems() {
+      if (isClearingItems) {
+        return;
+      }
+
+      isClearingItems = true;
+      clearBtn.disabled = true;
+      clearBtn.textContent = '清空中...';
+      clearModalConfirm.disabled = true;
+      clearModalCancel.disabled = true;
+      clearModalClose.disabled = true;
+
+      try {
+        const response = await fetch('/api/items', {
+          method: 'DELETE'
+        });
+        const data = await handleResponse(response);
+        if (data) {
+          closeClearModal();
+          await loadItems();
+        }
+      } catch (error) {
+        showError('清空失败: ' + error.message);
+        closeClearModal();
+      } finally {
+        isClearingItems = false;
+        clearBtn.disabled = false;
+        clearBtn.textContent = '清空列表';
+        clearModalConfirm.disabled = false;
+        clearModalCancel.disabled = false;
+        clearModalClose.disabled = false;
+      }
+    }
+
     function isImageFile(filename) {
       const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.bmp', '.webp'];
       const ext = filename.toLowerCase().substring(filename.lastIndexOf('.'));
@@ -981,6 +1316,24 @@
       document.body.style.overflow = '';
     }
 
+    function openClearModal() {
+      clearModalReturnFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+      clearModal.classList.add('visible');
+      clearModal.setAttribute('aria-hidden', 'false');
+      clearModalConfirm.focus();
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeClearModal() {
+      clearModal.classList.remove('visible');
+      clearModal.setAttribute('aria-hidden', 'true');
+      document.body.style.overflow = '';
+      if (clearModalReturnFocus) {
+        clearModalReturnFocus.focus();
+      }
+      clearModalReturnFocus = null;
+    }
+
     async function copyText(text, btn) {
       try {
         await navigator.clipboard.writeText(text);
@@ -1011,7 +1364,7 @@
       itemElement.appendChild(badge);
 
       if (item.type === 'text') {
-        const textContent = renderTextContent(item.content);
+        const textContent = renderTextContent('');
         itemElement.appendChild(textContent);
 
         const actions = document.createElement('div');
@@ -1019,19 +1372,55 @@
 
         const copyBtn = document.createElement('button');
         copyBtn.className = 'copy-btn';
-        copyBtn.textContent = '复制文本';
-        copyBtn.onclick = () => copyText(item.content, copyBtn);
         actions.appendChild(copyBtn);
 
         const expandBtn = document.createElement('button');
         expandBtn.className = 'expand-btn';
-        expandBtn.classList.toggle('visible', shouldShowExpandButton(item.content));
-        expandBtn.textContent = '展开全文';
-        expandBtn.onclick = () => {
-          textContent.classList.toggle('expanded');
-          expandBtn.textContent = textContent.classList.contains('expanded') ? '收起内容' : '展开全文';
-        };
         actions.appendChild(expandBtn);
+
+        const applyPlainText = (text) => {
+          textContent.textContent = text;
+          textContent.classList.remove('expanded');
+          copyBtn.disabled = false;
+          copyBtn.textContent = '复制文本';
+          copyBtn.onclick = () => copyText(text, copyBtn);
+          expandBtn.classList.toggle('visible', shouldShowExpandButton(text));
+          expandBtn.textContent = '展开全文';
+          expandBtn.onclick = () => {
+            textContent.classList.toggle('expanded');
+            expandBtn.textContent = textContent.classList.contains('expanded') ? '收起内容' : '展开全文';
+          };
+        };
+
+        const showEncryptedTextLocked = (message = '文本已加密，登录后会自动解密。') => {
+          textContent.textContent = message;
+          textContent.classList.remove('expanded');
+          copyBtn.disabled = true;
+          copyBtn.textContent = '等待解密';
+          copyBtn.onclick = null;
+          expandBtn.classList.remove('visible');
+          expandBtn.onclick = null;
+        };
+
+        if (item.encrypted || isEncryptedText(item.content)) {
+          badge.textContent = 'Encrypted Text';
+          copyBtn.disabled = true;
+          copyBtn.textContent = '解密中...';
+
+          if (getTextCryptoSecret()) {
+            decryptTextContent(item.content)
+              .then(applyPlainText)
+              .catch(() => {
+                clearTextCryptoSecret();
+                showEncryptedTextLocked('文本已加密，当前 PIN 不可用。请重新登录后再试。');
+              });
+          } else {
+            showEncryptedTextLocked();
+          }
+        } else {
+          applyPlainText(item.content);
+        }
+
         itemElement.appendChild(actions);
       } else if (item.type === 'file') {
         const fileContent = document.createElement('div');
@@ -1093,22 +1482,32 @@
     }
 
     async function submitText() {
-      const text = textInput.value;
+      const text = textInput.value.replace(/\r\n/g, '\n');
       if (!text.trim()) {
         showError('请输入文本内容后再发送');
         return;
       }
 
+      if (text.length > maxPlainTextLength) {
+        showError('文本内容过长');
+        return;
+      }
+
       submitTextBtn.disabled = true;
-      submitTextBtn.textContent = '发送中...';
+      submitTextBtn.textContent = '加密中...';
 
       try {
+        const encryptedText = await encryptTextContent(text);
+        submitTextBtn.textContent = '发送中...';
         const response = await fetch('/api/items/text', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
           },
-          body: JSON.stringify({ text })
+          body: JSON.stringify({
+            text: encryptedText,
+            encrypted: true
+          })
         });
         const data = await handleResponse(response);
         if (data) {
@@ -1177,6 +1576,15 @@
 
     submitTextBtn.addEventListener('click', submitText);
     refreshBtn.addEventListener('click', loadItems);
+    clearBtn.addEventListener('click', clearItems);
+    clearModalClose.addEventListener('click', closeClearModal);
+    clearModalCancel.addEventListener('click', closeClearModal);
+    clearModalConfirm.addEventListener('click', confirmClearItems);
+    clearModal.addEventListener('click', (event) => {
+      if (event.target === clearModal) {
+        closeClearModal();
+      }
+    });
     lightboxClose.addEventListener('click', closeLightbox);
     lightbox.addEventListener('click', (event) => {
       if (event.target === lightbox) {
@@ -1184,6 +1592,10 @@
       }
     });
     document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape' && clearModal.classList.contains('visible')) {
+        closeClearModal();
+        return;
+      }
       if (event.key === 'Escape' && lightbox.classList.contains('visible')) {
         closeLightbox();
       }

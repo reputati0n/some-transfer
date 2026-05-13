@@ -18,6 +18,7 @@ const uploadDir = config.uploadDir;
 const loginAttempts = new Map();
 const imageExtensions = new Set(['.jpg', '.jpeg', '.png', '.gif', '.bmp', '.webp']);
 const unsafeMethods = new Set(['POST', 'PUT', 'PATCH', 'DELETE']);
+const encryptedTextPrefix = 'stenc:v1:';
 
 if (config.trustProxy) {
   app.set('trust proxy', 1);
@@ -246,6 +247,38 @@ function isImageFile(filename) {
   return imageExtensions.has(path.extname(filename).toLowerCase());
 }
 
+function isValidEncryptedTextContent(content) {
+  if (typeof content !== 'string' || !content.startsWith(encryptedTextPrefix)) {
+    return false;
+  }
+
+  const parts = content.split(':');
+  if (parts.length !== 4 || parts[0] !== 'stenc' || parts[1] !== 'v1') {
+    return false;
+  }
+
+  const base64UrlPattern = /^[A-Za-z0-9_-]+$/;
+  const iv = parts[2];
+  const ciphertext = parts[3];
+
+  return iv.length === 16 &&
+    base64UrlPattern.test(iv) &&
+    ciphertext.length > 0 &&
+    ciphertext.length <= 60_000 &&
+    base64UrlPattern.test(ciphertext);
+}
+
+function deleteStoredFile(item) {
+  if (item.type !== 'file') {
+    return;
+  }
+
+  const filePath = resolveUploadPath(item.filepath);
+  if (filePath && fs.existsSync(filePath)) {
+    fs.unlinkSync(filePath);
+  }
+}
+
 function getTimestampMs(item) {
   const value = Date.parse(item.timestamp);
   return Number.isNaN(value) ? 0 : value;
@@ -361,6 +394,27 @@ app.get('/api/items', checkAuth, (req, res) => {
 
 app.post('/api/items/text', checkAuth, (req, res) => {
   const text = typeof req.body.text === 'string' ? req.body.text : '';
+  const isEncryptedText = req.body.encrypted === true || req.body.encrypted === 'true';
+
+  if (isEncryptedText) {
+    const encryptedText = text.trim();
+    if (!isValidEncryptedTextContent(encryptedText)) {
+      return res.status(400).json({ error: '加密文本格式无效' });
+    }
+
+    const newItem = {
+      id: crypto.randomUUID(),
+      type: 'text',
+      content: encryptedText,
+      encrypted: true,
+      timestamp: new Date().toISOString()
+    };
+
+    store.add(newItem);
+    res.setHeader('Content-Type', 'application/json; charset=utf-8');
+    return res.json(newItem);
+  }
+
   const normalizedText = text.replace(/\r\n/g, '\n');
 
   if (!normalizedText.trim()) {
@@ -423,15 +477,18 @@ app.delete('/api/items/:id', checkAuth, (req, res) => {
     return res.status(404).json({ error: '项目不存在' });
   }
 
-  if (item.type === 'file') {
-    const filePath = resolveUploadPath(item.filepath);
-    if (filePath && fs.existsSync(filePath)) {
-      fs.unlinkSync(filePath);
-    }
-  }
-
+  deleteStoredFile(item);
   store.remove(id);
   res.json({ success: true, message: '删除成功' });
+});
+
+app.delete('/api/items', checkAuth, (req, res) => {
+  const items = store.getAll();
+
+  items.forEach(deleteStoredFile);
+  store.clear();
+
+  res.json({ success: true, message: '内容已清空' });
 });
 
 app.get('/download/:filename', checkAuth, (req, res) => {

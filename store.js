@@ -93,6 +93,12 @@ function remove(id) {
   return null;
 }
 
+// 清空所有项目
+function clear() {
+  items = [];
+  saveData();
+}
+
 // 获取单个项目
 function getById(id) {
   return items.find(item => item.id === id) || null;
@@ -112,6 +118,7 @@ module.exports = {
   remove,
   getById,
   getByStoredFilename,
+  clear,
   loadData,
   saveData
 };

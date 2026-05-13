@@ -346,6 +346,8 @@
     const form = document.getElementById('login-form');
     const errorMessage = document.getElementById('error-message');
     const submitButton = form.querySelector('button');
+    const textCryptoSecretStorageKey = 'some-transfer:text-crypto-secret';
+    const textCryptoSecretLocalStorageKey = 'some-transfer:text-crypto-secret:v2';
 
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
@@ -366,6 +368,8 @@
         });
 
         if (response.ok) {
+          sessionStorage.setItem(textCryptoSecretStorageKey, String(pin));
+          localStorage.setItem(textCryptoSecretLocalStorageKey, String(pin));
           window.location.href = '/index.html';
         } else {
           const data = await response.json().catch(() => null);
