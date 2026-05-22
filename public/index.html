@@ -1704,6 +1704,13 @@
         const fileActions = document.createElement('div');
         fileActions.className = 'file-actions';
 
+        const downloadLink = document.createElement('a');
+        downloadLink.href = `/download/${item.filepath}`;
+        downloadLink.className = 'file-download';
+        downloadLink.download = item.filename;
+        downloadLink.textContent = '下载文件';
+        fileActions.appendChild(downloadLink);
+
         if (isImageFile(item.filename)) {
           const previewBtn = document.createElement('button');
           previewBtn.type = 'button';
@@ -1716,13 +1723,6 @@
           });
           fileActions.appendChild(previewBtn);
         }
-
-        const downloadLink = document.createElement('a');
-        downloadLink.href = `/download/${item.filepath}`;
-        downloadLink.className = 'file-download';
-        downloadLink.download = item.filename;
-        downloadLink.textContent = '下载文件';
-        fileActions.appendChild(downloadLink);
         fileContent.appendChild(fileActions);
 
         itemElement.appendChild(fileContent);
