@@ -520,30 +520,32 @@
     }
 
     .content-grid {
-      column-width: 320px;
-      column-gap: 18px;
+      --masonry-gap: 18px;
+      --masonry-min-width: 320px;
+      --masonry-row-height: 8px;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(min(100%, var(--masonry-min-width)), var(--masonry-min-width)));
+      grid-auto-flow: row dense;
+      grid-auto-rows: var(--masonry-row-height);
+      gap: var(--masonry-gap);
+      align-items: start;
+      justify-content: start;
       min-height: 120px;
     }
 
     .content-grid.is-empty {
-      column-count: 1;
-      column-width: auto;
+      display: block;
     }
 
     .item {
-      position: relative;
-      display: inline-block;
-      width: 100%;
-      margin: 0 0 18px;
+      display: block;
       padding: 22px;
       border-radius: 24px;
       background: var(--item-surface);
       border: 1px solid var(--line);
       box-shadow: var(--item-shadow);
-      break-inside: avoid;
+      align-self: start;
       contain: content;
-      content-visibility: auto;
-      contain-intrinsic-size: 360px;
       overflow: hidden;
     }
 
@@ -1167,6 +1169,7 @@
     let pendingTextCryptoSecret = '';
     let clearModalReturnFocus = null;
     let isClearingItems = false;
+    let masonryLayoutFrame = null;
 
     function getStoredThemePreference() {
       try {
@@ -1397,6 +1400,51 @@
       }
     }
 
+    function getMasonryMetrics() {
+      const styles = getComputedStyle(contentGrid);
+      const rowHeight = Number.parseFloat(styles.getPropertyValue('--masonry-row-height')) || 8;
+      const gap = Number.parseFloat(styles.getPropertyValue('--masonry-gap')) || 18;
+
+      return { rowHeight, gap };
+    }
+
+    function clearMasonryLayout() {
+      contentGrid.querySelectorAll('.item').forEach((item) => {
+        item.style.gridRowEnd = '';
+      });
+    }
+
+    function layoutContentGrid() {
+      masonryLayoutFrame = null;
+
+      if (contentGrid.classList.contains('is-empty')) {
+        clearMasonryLayout();
+        return;
+      }
+
+      const { rowHeight, gap } = getMasonryMetrics();
+      const items = Array.from(contentGrid.querySelectorAll('.item'));
+
+      items.forEach((item) => {
+        item.style.gridRowEnd = 'span 1';
+      });
+
+      items.forEach((item) => {
+        const borderHeight = item.offsetHeight - item.clientHeight;
+        const itemHeight = item.scrollHeight + borderHeight;
+        const rowSpan = Math.ceil((itemHeight + gap) / (rowHeight + gap));
+        item.style.gridRowEnd = `span ${Math.max(1, rowSpan)}`;
+      });
+    }
+
+    function scheduleMasonryLayout() {
+      if (masonryLayoutFrame !== null) {
+        return;
+      }
+
+      masonryLayoutFrame = window.requestAnimationFrame(layoutContentGrid);
+    }
+
     async function logout() {
       try {
         const response = await fetch('/logout', { method: 'POST' });
@@ -1430,12 +1478,14 @@
 
           if (data.length === 0) {
             contentGrid.innerHTML = '<div class="empty-state">暂无内容。<br>你可以先发送一段文本，或者上传一个文件作为起点。</div>';
+            clearMasonryLayout();
           } else {
             const fragment = document.createDocumentFragment();
             data.forEach(item => {
               fragment.appendChild(renderItem(item));
             });
             contentGrid.appendChild(fragment);
+            scheduleMasonryLayout();
           }
         }
       } catch (error) {
@@ -1599,7 +1649,9 @@
           expandBtn.onclick = () => {
             textContent.classList.toggle('expanded');
             expandBtn.textContent = textContent.classList.contains('expanded') ? '收起内容' : '展开全文';
+            scheduleMasonryLayout();
           };
+          scheduleMasonryLayout();
         };
 
         const showEncryptedTextLocked = (message = '文本已加密，登录后会自动解密。') => {
@@ -1610,6 +1662,7 @@
           copyBtn.onclick = null;
           expandBtn.classList.remove('visible');
           expandBtn.onclick = null;
+          scheduleMasonryLayout();
         };
 
         if (item.encrypted || isEncryptedText(item.content)) {
@@ -1812,6 +1865,10 @@
     });
 
     initializeThemeControls();
+    window.addEventListener('resize', scheduleMasonryLayout);
+    if (document.fonts && document.fonts.ready) {
+      document.fonts.ready.then(scheduleMasonryLayout).catch(() => {});
+    }
     loadItems();
   </script>
 </body>
