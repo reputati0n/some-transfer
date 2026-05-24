@@ -533,6 +533,10 @@
       min-height: 120px;
     }
 
+    .content-grid.is-refreshing {
+      animation: refresh-flash 0.32s ease-out both;
+    }
+
     .content-grid.is-empty {
       display: block;
     }
@@ -899,6 +903,29 @@
       line-height: 1.8;
     }
 
+    @keyframes refresh-flash {
+      0% {
+        opacity: 1;
+        filter: saturate(1);
+      }
+
+      45% {
+        opacity: 0.48;
+        filter: saturate(0.82);
+      }
+
+      100% {
+        opacity: 1;
+        filter: saturate(1);
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .content-grid.is-refreshing {
+        animation: none;
+      }
+    }
+
     @media (max-width: 1120px) {
       .hero {
         grid-template-columns: 1fr;
@@ -1161,6 +1188,7 @@
     const encryptedTextSalt = 'some-transfer:text-encryption:v1';
     const encryptedTextIterations = 150000;
     const maxPlainTextLength = 10000;
+    const refreshFlashAnimationMs = 340;
     let isLoadingItems = false;
     let shouldReloadItems = false;
     let textCryptoKey = null;
@@ -1170,6 +1198,7 @@
     let clearModalReturnFocus = null;
     let isClearingItems = false;
     let masonryLayoutFrame = null;
+    let refreshFlashTimeout = null;
 
     function getStoredThemePreference() {
       try {
@@ -1445,6 +1474,26 @@
       masonryLayoutFrame = window.requestAnimationFrame(layoutContentGrid);
     }
 
+    function setListBusy(isBusy) {
+      contentGrid.setAttribute('aria-busy', String(isBusy));
+    }
+
+    function playListRefreshFlash() {
+      contentGrid.classList.remove('is-refreshing');
+
+      if (refreshFlashTimeout !== null) {
+        window.clearTimeout(refreshFlashTimeout);
+      }
+
+      window.requestAnimationFrame(() => {
+        contentGrid.classList.add('is-refreshing');
+        refreshFlashTimeout = window.setTimeout(() => {
+          contentGrid.classList.remove('is-refreshing');
+          refreshFlashTimeout = null;
+        }, refreshFlashAnimationMs);
+      });
+    }
+
     async function logout() {
       try {
         const response = await fetch('/logout', { method: 'POST' });
@@ -1465,6 +1514,8 @@
 
       isLoadingItems = true;
       shouldReloadItems = false;
+      setListBusy(true);
+      playListRefreshFlash();
       refreshBtn.disabled = true;
       refreshBtn.textContent = '刷新中...';
 
@@ -1491,6 +1542,7 @@
       } catch (error) {
         showError('加载内容失败: ' + error.message);
       } finally {
+        setListBusy(false);
         isLoadingItems = false;
         refreshBtn.disabled = false;
         refreshBtn.textContent = '刷新列表';
