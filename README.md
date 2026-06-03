@@ -38,14 +38,6 @@ npm start
 docker pull reputati0n/some-transfer:v0.1
 ```
 
-面板部署时使用:
-
-```text
-镜像: reputati0n/some-transfer:v0.1
-容器端口: 3000
-宿主机端口: 7300
-```
-
 推荐的持久化目录:
 
 ```text
@@ -60,18 +52,6 @@ docker pull reputati0n/some-transfer:v0.1
 ```env
 UPLOAD_DIR=/app/uploads
 DATA_FILE=/app/data/data.json
-```
-
-旧数据文件应放在:
-
-```text
-/mnt/user/appdata/some-transfer/data/data.json
-```
-
-上传文件应放在:
-
-```text
-/mnt/user/appdata/some-transfer/uploads/
 ```
 
 #### 使用 Docker Compose
@@ -92,25 +72,6 @@ docker compose --env-file /mnt/user/appdata/some-transfer/.env up -d --build
 ```bash
 ./build-and-run.sh
 ```
-
-### Docker Hub 发版
-
-每次发版使用同一个脚本构建并推送版本标签和 `latest` 标签:
-
-```bash
-DOCKER_IMAGE=your-dockerhub-username/some-transfer APP_VERSION=v0.1 ./release-docker.sh
-```
-
-默认会发布 `linux/amd64` 和 `linux/arm64` 两个平台。需要自定义平台时设置 `PLATFORMS`:
-
-```bash
-DOCKER_IMAGE=your-dockerhub-username/some-transfer PLATFORMS=linux/amd64 ./release-docker.sh
-```
-
-发版前先执行 `docker login`。`DOCKER_IMAGE` 必须是 Docker Hub 上的真实仓库名，脚本会推送:
-
-- `your-dockerhub-username/some-transfer:v0.1`
-- `your-dockerhub-username/some-transfer:latest`
 
 ## 环境变量
 
