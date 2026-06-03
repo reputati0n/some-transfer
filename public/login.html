@@ -145,7 +145,11 @@
       box-shadow: 0 0 0 6px rgba(201, 111, 59, 0.12);
     }
 
-    .brand-row {
+    .intro-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
       margin-bottom: 20px;
     }
 
@@ -293,17 +297,14 @@
     }
 
     .theme-switcher {
-      position: absolute;
-      top: 24px;
-      right: 24px;
       display: inline-flex;
       align-items: center;
+      flex: 0 0 auto;
       gap: 4px;
       padding: 4px;
       border-radius: 16px;
       background: var(--soft-surface);
       border: 1px solid var(--panel-border);
-      z-index: 2;
     }
 
     .theme-option {
@@ -391,10 +392,14 @@
         padding: 24px;
       }
 
+      .intro-header {
+        align-items: stretch;
+        flex-direction: column;
+        gap: 14px;
+      }
+
       .theme-switcher {
-        position: static;
         width: 100%;
-        margin-bottom: 22px;
       }
 
       .theme-option {
@@ -424,14 +429,14 @@
 <body>
   <main class="page-shell">
     <section class="intro-panel">
-      <div class="theme-switcher" role="group" aria-label="外观模式">
-        <button class="theme-option" type="button" data-theme-option="light" aria-pressed="false">浅色</button>
-        <button class="theme-option" type="button" data-theme-option="dark" aria-pressed="false">深色</button>
-        <button class="theme-option" type="button" data-theme-option="system" aria-pressed="false">跟随系统</button>
-      </div>
       <div>
-        <div class="brand-row">
+        <div class="intro-header">
           <div class="eyebrow">Private Transfer Hub</div>
+          <div class="theme-switcher" role="group" aria-label="外观模式">
+            <button class="theme-option" type="button" data-theme-option="light" aria-pressed="false">浅色</button>
+            <button class="theme-option" type="button" data-theme-option="dark" aria-pressed="false">深色</button>
+            <button class="theme-option" type="button" data-theme-option="system" aria-pressed="false">跟随系统</button>
+          </div>
         </div>
         <h1>更轻巧的私有文件中转站</h1>
         <p class="lead">
