@@ -1,6 +1,6 @@
 {
   "name": "some-transfer",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "description": "自托管的 Web 文件分享系统",
   "main": "server.js",
   "scripts": {

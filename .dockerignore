@@ -1,11 +1,10 @@
 .git
-.gitignore
-.dockerignore
 .env
 .env.*
 !.env.example
 node_modules
-uploads
+npm-debug.log*
 data
 data.json
-npm-debug.log*
+uploads
+.DS_Store

@@ -903,6 +903,18 @@
       line-height: 1.8;
     }
 
+    .app-footer {
+      padding: 24px 0 4px;
+      color: var(--muted);
+      font-size: 13px;
+      text-align: center;
+    }
+
+    .app-footer span {
+      font-weight: 600;
+      color: var(--text);
+    }
+
     @keyframes refresh-flash {
       0% {
         opacity: 1;
@@ -1121,6 +1133,10 @@
     </div>
 
     <div class="content-grid" id="content-grid"></div>
+
+    <footer class="app-footer">
+      Some Transfer <span id="app-version">v0.1</span>
+    </footer>
   </div>
 
   <div class="lightbox" id="lightbox" aria-hidden="true">
@@ -1176,6 +1192,7 @@
     const clearModalClose = document.getElementById('clear-modal-close');
     const clearModalCancel = document.getElementById('clear-modal-cancel');
     const clearModalConfirm = document.getElementById('clear-modal-confirm');
+    const appVersion = document.getElementById('app-version');
     const themeButtons = document.querySelectorAll('[data-theme-option]');
     const themeStorageKey = 'some-transfer:theme-mode';
     const themeMediaQuery = window.matchMedia
@@ -1476,6 +1493,21 @@
 
     function setListBusy(isBusy) {
       contentGrid.setAttribute('aria-busy', String(isBusy));
+    }
+
+    async function loadAppInfo() {
+      try {
+        const response = await fetch('/api/app-info', { cache: 'no-store' });
+        if (!response.ok) {
+          return;
+        }
+        const data = await response.json();
+        if (data && typeof data.version === 'string' && data.version.trim()) {
+          appVersion.textContent = data.version.trim();
+        }
+      } catch (error) {
+        // Keep the built-in version label if app info cannot be loaded.
+      }
     }
 
     function playListRefreshFlash() {
@@ -1921,6 +1953,7 @@
     if (document.fonts && document.fonts.ready) {
       document.fonts.ready.then(scheduleMasonryLayout).catch(() => {});
     }
+    loadAppInfo();
     loadItems();
   </script>
 </body>

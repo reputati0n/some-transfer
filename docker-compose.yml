@@ -2,20 +2,25 @@ version: '3.8'
 
 services:
   some-transfer:
-    build: .
-    image: some-transfer:latest
+    build:
+      context: .
+      args:
+        APP_VERSION: ${APP_VERSION:-v0.1}
+    image: ${DOCKER_IMAGE:-some-transfer}:${APP_VERSION:-v0.1}
     container_name: some-transfer
     user: "${PUID:-99}:${PGID:-100}"
     ports:
-      - "7300:3000"
+      - "${HOST_PORT:-7300}:3000"
     restart: unless-stopped
     env_file:
-      - .env
+      - ${APPDATA_ROOT:-/mnt/user/appdata/some-transfer}/.env
     environment:
       NODE_ENV: production
       PORT: 3000
+      APP_VERSION: ${APP_VERSION:-v0.1}
       UPLOAD_DIR: /app/uploads
       DATA_FILE: /app/data/data.json
     volumes:
+      - ${APPDATA_ROOT:-/mnt/user/appdata/some-transfer}/.env:/app/.env:ro
       - ${APPDATA_ROOT:-/mnt/user/appdata/some-transfer}/uploads:/app/uploads
       - ${APPDATA_ROOT:-/mnt/user/appdata/some-transfer}/data:/app/data

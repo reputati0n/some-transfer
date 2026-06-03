@@ -84,6 +84,7 @@
       min-height: 100svh;
       min-height: 100dvh;
       display: flex;
+      flex-direction: column;
       align-items: center;
       justify-content: center;
       font-family: "Avenir Next", "PingFang SC", "Noto Sans SC", sans-serif;
@@ -337,6 +338,21 @@
       box-shadow: 0 6px 16px rgba(61, 42, 22, 0.08);
     }
 
+    .app-footer {
+      position: fixed;
+      left: 24px;
+      right: 24px;
+      bottom: 18px;
+      color: var(--muted);
+      font-size: 13px;
+      text-align: center;
+    }
+
+    .app-footer span {
+      font-weight: 600;
+      color: var(--text);
+    }
+
     @media (max-width: 920px) {
       body {
         display: block;
@@ -359,6 +375,11 @@
     @media (max-width: 640px) {
       body {
         padding: 16px;
+      }
+
+      .app-footer {
+        position: static;
+        margin-top: 16px;
       }
 
       .intro-panel,
@@ -458,11 +479,15 @@
       </div>
     </section>
   </main>
+  <footer class="app-footer">
+    Some Transfer <span id="app-version">v0.1</span>
+  </footer>
 
   <script>
     const form = document.getElementById('login-form');
     const errorMessage = document.getElementById('error-message');
     const submitButton = form.querySelector('button');
+    const appVersion = document.getElementById('app-version');
     const themeButtons = document.querySelectorAll('[data-theme-option]');
     const themeStorageKey = 'some-transfer:theme-mode';
     const themeMediaQuery = window.matchMedia
@@ -533,7 +558,23 @@
       }
     }
 
+    async function loadAppInfo() {
+      try {
+        const response = await fetch('/api/app-info', { cache: 'no-store' });
+        if (!response.ok) {
+          return;
+        }
+        const data = await response.json();
+        if (data && typeof data.version === 'string' && data.version.trim()) {
+          appVersion.textContent = data.version.trim();
+        }
+      } catch (error) {
+        // Keep the built-in version label if app info cannot be loaded.
+      }
+    }
+
     initializeThemeControls();
+    loadAppInfo();
 
     form.addEventListener('submit', async (e) => {
       e.preventDefault();

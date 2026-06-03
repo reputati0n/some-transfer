@@ -387,6 +387,15 @@ app.get('/index.html', checkAuth, (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
+app.get('/api/app-info', (req, res) => {
+  res.setHeader('Content-Type', 'application/json; charset=utf-8');
+  res.setHeader('Cache-Control', 'no-store');
+  res.json({
+    name: 'Some Transfer',
+    version: config.appVersion
+  });
+});
+
 app.get('/api/items', checkAuth, (req, res) => {
   res.setHeader('Content-Type', 'application/json; charset=utf-8');
   res.json(getItemsNewestFirst());

@@ -1,5 +1,6 @@
 const path = require('path');
 const crypto = require('crypto');
+const packageInfo = require('./package.json');
 
 function readString(name) {
   const value = process.env[name];
@@ -31,6 +32,25 @@ function readCookieSecure(name) {
 function looksLikePlaceholderSecret(value) {
   const normalized = String(value || '').toLowerCase();
   return normalized.includes('replace-with') || normalized.includes('your-session-secret');
+}
+
+function normalizeAppVersion(value) {
+  const version = String(value || '').trim();
+  if (!version) {
+    return '';
+  }
+
+  return version.startsWith('v') ? version : `v${version}`;
+}
+
+function getDefaultAppVersion() {
+  const version = String(packageInfo.version || '').trim();
+  const minorVersionMatch = version.match(/^(\d+)\.(\d+)\.0$/);
+  if (minorVersionMatch) {
+    return `v${minorVersionMatch[1]}.${minorVersionMatch[2]}`;
+  }
+
+  return normalizeAppVersion(version) || 'v0.1';
 }
 
 const env = readString('NODE_ENV') || 'development';
@@ -65,6 +85,7 @@ if (looksLikePlaceholderSecret(sessionSecret)) {
 module.exports = {
   env,
   isProduction,
+  appVersion: normalizeAppVersion(readString('APP_VERSION')) || getDefaultAppVersion(),
   port: readPositiveInt('PORT', 3000),
   pin,
   uploadDir: path.resolve(readString('UPLOAD_DIR') || path.join(__dirname, 'uploads')),
