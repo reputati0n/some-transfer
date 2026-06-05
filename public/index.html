@@ -524,12 +524,12 @@
       --masonry-min-width: 320px;
       --masonry-row-height: 8px;
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(min(100%, var(--masonry-min-width)), var(--masonry-min-width)));
+      grid-template-columns: repeat(auto-fit, minmax(min(100%, var(--masonry-min-width)), 1fr));
       grid-auto-flow: row dense;
       grid-auto-rows: var(--masonry-row-height);
       gap: var(--masonry-gap);
       align-items: start;
-      justify-content: start;
+      justify-content: stretch;
       min-height: 120px;
     }
 
@@ -1135,7 +1135,7 @@
     <div class="content-grid" id="content-grid"></div>
 
     <footer class="app-footer">
-      Some Transfer <span id="app-version">v0.1</span>
+      Some Transfer <span id="app-version">v0.1.1</span>
     </footer>
   </div>
 
