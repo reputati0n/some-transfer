@@ -2,7 +2,7 @@
 
 轻量、自托管的私有文件与文本中转站。
 
-当前版本: `v0.1.1`
+当前版本: `v0.1.2`
 
 ## 功能特性
 
@@ -35,7 +35,7 @@ npm start
 已发布的镜像支持 `linux/amd64` 和 `linux/arm64`:
 
 ```bash
-docker pull reputati0n/some-transfer:v0.1.1
+docker pull reputati0n/some-transfer:v0.1.2
 ```
 
 推荐的持久化目录:
@@ -79,7 +79,7 @@ docker compose --env-file /mnt/user/appdata/some-transfer/.env up -d --build
 |------|------|------|
 | `APP_PIN` | 是 | 登录 PIN 码，建议 8 位以上 |
 | `SESSION_SECRET` | 是 | Session 密钥，至少 32 位 |
-| `APP_VERSION` | 否 | 前端页脚展示版本，当前默认 `v0.1.1` |
+| `APP_VERSION` | 否 | 前端页脚展示版本，当前默认 `v0.1.2` |
 | `PORT` | 否 | 端口，默认 3000 |
 | `HOST_PORT` | 否 | Docker 部署映射到宿主机的端口，默认 7300 |
 | `APPDATA_ROOT` | 否 | Docker 部署的宿主机持久化目录 |

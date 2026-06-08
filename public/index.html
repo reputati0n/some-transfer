@@ -522,12 +522,13 @@
     .content-grid {
       --masonry-gap: 18px;
       --masonry-min-width: 320px;
-      --masonry-row-height: 8px;
+      --masonry-row-height: 2px;
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(min(100%, var(--masonry-min-width)), 1fr));
       grid-auto-flow: row dense;
       grid-auto-rows: var(--masonry-row-height);
-      gap: var(--masonry-gap);
+      column-gap: var(--masonry-gap);
+      row-gap: 0;
       align-items: start;
       justify-content: stretch;
       min-height: 120px;
@@ -1135,7 +1136,7 @@
     <div class="content-grid" id="content-grid"></div>
 
     <footer class="app-footer">
-      Some Transfer <span id="app-version">v0.1.1</span>
+      Some Transfer <span id="app-version">v0.1.2</span>
     </footer>
   </div>
 
@@ -1478,7 +1479,7 @@
       items.forEach((item) => {
         const borderHeight = item.offsetHeight - item.clientHeight;
         const itemHeight = item.scrollHeight + borderHeight;
-        const rowSpan = Math.ceil((itemHeight + gap) / (rowHeight + gap));
+        const rowSpan = Math.ceil((itemHeight + gap) / rowHeight);
         item.style.gridRowEnd = `span ${Math.max(1, rowSpan)}`;
       });
     }
