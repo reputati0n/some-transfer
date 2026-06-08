@@ -572,7 +572,7 @@
       line-height: 1.8;
       font-size: 15px;
       padding-right: 6px;
-      max-height: calc(1.8em * 10);
+      max-height: calc(1.8em * 5);
       overflow: hidden;
       overflow-wrap: anywhere;
       white-space: break-spaces;
@@ -1640,7 +1640,7 @@
     }
 
     function shouldShowExpandButton(text) {
-      return text.length > 520 || text.split('\n').length > 10;
+      return text.length > 260 || text.split('\n').length > 5;
     }
 
     function openLightbox({ src, filename, size }) {
