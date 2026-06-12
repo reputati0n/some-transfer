@@ -1,6 +1,6 @@
 FROM node:20-bookworm-slim
 
-ARG APP_VERSION=v0.1.2
+ARG APP_VERSION=v0.1.3
 
 ENV NODE_ENV=production \
     APP_VERSION=${APP_VERSION}
