@@ -275,6 +275,7 @@
     .image-preview-btn,
     .copy-btn,
     .delete-btn,
+    .pin-btn,
     .expand-btn {
       border: none;
       cursor: pointer;
@@ -343,7 +344,8 @@
     .file-download:hover,
     .image-preview-btn:hover,
     .copy-btn:hover,
-    .delete-btn:hover {
+    .delete-btn:hover,
+    .pin-btn:hover {
       box-shadow: var(--shadow-md);
     }
 
@@ -631,6 +633,23 @@
       right: 18px;
       background: rgba(201, 70, 53, 0.12);
       color: var(--danger);
+    }
+
+    .pin-btn {
+      position: absolute;
+      top: 18px;
+      right: 80px;
+      padding: 10px 14px;
+      border-radius: 14px;
+      font-size: 13px;
+      font-weight: 600;
+      background: rgba(45, 120, 191, 0.12);
+      color: var(--blue);
+    }
+
+    .pin-btn.pinned {
+      background: rgba(47, 124, 75, 0.12);
+      color: var(--green);
     }
 
     .item-file {
@@ -1136,7 +1155,7 @@
     <div class="content-grid" id="content-grid"></div>
 
     <footer class="app-footer">
-      Some Transfer <span id="app-version">v0.1.3</span>
+      Some Transfer <span id="app-version">v0.1.4</span>
     </footer>
   </div>
 
@@ -1162,7 +1181,7 @@
     <div class="confirm-panel" role="dialog" aria-modal="true" aria-labelledby="clear-modal-title" aria-describedby="clear-modal-body">
       <button class="confirm-close" id="clear-modal-close" type="button" aria-label="关闭确认弹窗">&times;</button>
       <h2 class="confirm-title" id="clear-modal-title">清空内容列表</h2>
-      <p class="confirm-body" id="clear-modal-body">是否清空内容列表？清空后所有文本和文件都会被删除，无法恢复。</p>
+      <p class="confirm-body" id="clear-modal-body">是否清空内容列表？清空后所有未置顶的文本和文件都会被删除，无法恢复。已置顶的内容将被保留。</p>
       <div class="confirm-actions">
         <button class="confirm-btn confirm-cancel" id="clear-modal-cancel" type="button">取消</button>
         <button class="confirm-btn confirm-danger" id="clear-modal-confirm" type="button">确定清空</button>
@@ -1731,6 +1750,12 @@
       const itemElement = document.createElement('div');
       itemElement.className = 'item';
 
+      const pinBtn = document.createElement('button');
+      pinBtn.className = 'pin-btn' + (item.pinned ? ' pinned' : '');
+      pinBtn.textContent = item.pinned ? 'UnPin' : 'Pin';
+      pinBtn.onclick = () => togglePinItem(item.id);
+      itemElement.appendChild(pinBtn);
+
       const deleteBtn = document.createElement('button');
       deleteBtn.className = 'delete-btn';
       deleteBtn.textContent = '删除';
@@ -1946,6 +1971,18 @@
         loadItems();
       } catch (error) {
         showError('删除失败: ' + error.message);
+      }
+    }
+
+    async function togglePinItem(id) {
+      try {
+        const response = await fetch(`/api/items/${id}/pin`, {
+          method: 'PATCH'
+        });
+        await handleResponse(response);
+        loadItems();
+      } catch (error) {
+        showError('操作失败: ' + error.message);
       }
     }
 

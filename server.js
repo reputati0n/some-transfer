@@ -288,6 +288,16 @@ function getItemsNewestFirst() {
   return store.getAll()
     .map((item, index) => ({ item, index }))
     .sort((left, right) => {
+      const leftPinned = left.item.pinned ? 1 : 0;
+      const rightPinned = right.item.pinned ? 1 : 0;
+      if (leftPinned !== rightPinned) {
+        return rightPinned - leftPinned;
+      }
+      if (leftPinned && rightPinned) {
+        const leftPinnedAt = left.item.pinnedAt || 0;
+        const rightPinnedAt = right.item.pinnedAt || 0;
+        return leftPinnedAt - rightPinnedAt;
+      }
       const timeDiff = getTimestampMs(right.item) - getTimestampMs(left.item);
       return timeDiff || right.index - left.index;
     })
@@ -489,6 +499,17 @@ app.delete('/api/items/:id', checkAuth, (req, res) => {
   deleteStoredFile(item);
   store.remove(id);
   res.json({ success: true, message: '删除成功' });
+});
+
+app.patch('/api/items/:id/pin', checkAuth, (req, res) => {
+  const id = req.params.id;
+  const item = store.getById(id);
+  if (!item) {
+    return res.status(404).json({ error: '项目不存在' });
+  }
+
+  const updated = store.togglePin(id);
+  res.json({ success: true, item: updated });
 });
 
 app.delete('/api/items', checkAuth, (req, res) => {

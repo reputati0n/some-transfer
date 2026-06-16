@@ -43,6 +43,11 @@ function loadData() {
       const data = fs.readFileSync(DATA_FILE, 'utf8');
       const parsed = JSON.parse(data);
       items = Array.isArray(parsed) ? parsed.filter(isValidItem) : [];
+      items.forEach(item => {
+        if (item.pinned && !item.pinnedAt) {
+          item.pinnedAt = 0;
+        }
+      });
       console.log(`已加载 ${items.length} 条数据`);
     } else {
       items = [];
@@ -93,9 +98,21 @@ function remove(id) {
   return null;
 }
 
-// 清空所有项目
+// 切换置顶状态
+function togglePin(id) {
+  const item = items.find(item => item.id === id);
+  if (item) {
+    item.pinned = !item.pinned;
+    item.pinnedAt = item.pinned ? Date.now() : null;
+    saveData();
+    return item;
+  }
+  return null;
+}
+
+// 清空所有项目（保留已置顶的项目）
 function clear() {
-  items = [];
+  items = items.filter(item => item.pinned);
   saveData();
 }
 
@@ -119,6 +136,7 @@ module.exports = {
   getById,
   getByStoredFilename,
   clear,
+  togglePin,
   loadData,
   saveData
 };
