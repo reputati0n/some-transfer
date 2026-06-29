@@ -130,93 +130,19 @@
       margin: 0 auto;
     }
 
-    .hero {
-      position: relative;
+    .top-row {
       display: grid;
-      grid-template-columns: minmax(0, 1.15fr) minmax(320px, 0.85fr);
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
       gap: 22px;
       margin-bottom: 24px;
     }
 
-    .hero-card,
     .status-card,
     .composer {
       background: var(--panel);
       border: 1px solid var(--line);
       box-shadow: var(--shadow-md);
-    }
-
-    .hero-card,
-    .status-card,
-    .composer {
       border-radius: var(--radius-xl);
-    }
-
-    .hero-card {
-      padding: 34px;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .eyebrow {
-      display: inline-flex;
-      align-items: center;
-      gap: 10px;
-      padding: 10px 14px;
-      border-radius: 999px;
-      background: var(--chip-bg);
-      border: 1px solid var(--chip-border);
-      color: var(--muted);
-      font-size: 13px;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-    }
-
-    .eyebrow::before {
-      content: "";
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: var(--accent);
-      box-shadow: 0 0 0 6px rgba(204, 111, 57, 0.12);
-    }
-
-    .hero-brand {
-      margin-bottom: 20px;
-    }
-
-    .hero h1 {
-      margin: 0 0 14px;
-      font-size: clamp(34px, 5vw, 64px);
-      line-height: 0.98;
-      letter-spacing: -0.05em;
-    }
-
-    .hero p {
-      margin: 0;
-      max-width: 42rem;
-      color: var(--muted);
-      font-size: 17px;
-      line-height: 1.8;
-    }
-
-    .hero-actions {
-      margin-top: 28px;
-      display: flex;
-      flex-wrap: wrap;
-      gap: 12px;
-    }
-
-    .pill {
-      display: inline-flex;
-      align-items: center;
-      gap: 10px;
-      padding: 12px 16px;
-      border-radius: 999px;
-      background: var(--chip-bg);
-      border: 1px solid var(--chip-border);
-      color: var(--muted);
-      font-size: 14px;
     }
 
     .status-card {
@@ -225,7 +151,6 @@
       display: flex;
       flex-direction: column;
       justify-content: space-between;
-      min-height: 100%;
     }
 
     .status-card h2 {
@@ -350,8 +275,9 @@
     }
 
     .composer {
-      padding: 22px;
-      margin-bottom: 22px;
+      padding: 28px;
+      display: flex;
+      flex-direction: column;
     }
 
     .composer-top {
@@ -959,7 +885,7 @@
     }
 
     @media (max-width: 1120px) {
-      .hero {
+      .top-row {
         grid-template-columns: 1fr;
       }
     }
@@ -984,24 +910,17 @@
     }
 
     @media (max-width: 640px) {
-      .hero-card,
       .status-card,
       .composer,
       .item {
         border-radius: 22px;
       }
 
-      .hero-card,
       .status-card,
       .composer,
       .item {
         padding-left: 18px;
         padding-right: 18px;
-      }
-
-      .hero-card {
-        padding-top: 24px;
-        padding-bottom: 24px;
       }
 
       .status-card,
@@ -1071,23 +990,7 @@
 </head>
 <body>
   <div class="container">
-    <section class="hero">
-      <div class="hero-card">
-        <div class="hero-brand">
-          <div class="eyebrow">Workspace</div>
-        </div>
-        <h1>更清晰的临时传输工作台</h1>
-        <p>
-          文本发送、文件上传、图片预览和下载，一页完成，手机和桌面都顺手。
-        </p>
-        <div class="hero-actions">
-          <div class="pill">文本快速投递</div>
-          <div class="pill">图片预览</div>
-          <div class="pill">安全下载</div>
-          <div class="pill">响应式布局</div>
-        </div>
-      </div>
-
+    <div class="top-row">
       <aside class="status-card">
         <div>
           <h2>当前空间</h2>
@@ -1116,30 +1019,30 @@
           <button class="logout-btn" onclick="logout()">退出登录</button>
         </div>
       </aside>
-    </section>
+
+      <section class="composer">
+        <div class="composer-top">
+          <div>
+            <h2>新建内容</h2>
+            <p>支持保留粘贴内容的换行和空格，粘贴后直接按回车即可发送。</p>
+          </div>
+        </div>
+
+        <div class="composer-form">
+          <textarea class="text-input" placeholder="粘贴文本内容，换行和空格会尽量按原样保留"></textarea>
+          <div class="composer-actions">
+            <div class="file-upload">
+              <input type="file" id="file-input">
+              <label class="upload-label" for="file-input" id="upload-label">选择文件</label>
+            </div>
+            <button class="composer-submit" id="submit-text-btn" type="button">发送文本</button>
+          </div>
+        </div>
+        <div class="selected-file" id="selected-file"></div>
+      </section>
+    </div>
 
     <div class="error-message" id="error-message"></div>
-
-    <section class="composer">
-      <div class="composer-top">
-        <div>
-          <h2>新建内容</h2>
-          <p>支持保留粘贴内容的换行和空格，粘贴后直接按回车即可发送。</p>
-        </div>
-      </div>
-
-      <div class="composer-form">
-        <textarea class="text-input" placeholder="粘贴文本内容，换行和空格会尽量按原样保留"></textarea>
-        <div class="composer-actions">
-          <div class="file-upload">
-            <input type="file" id="file-input">
-            <label class="upload-label" for="file-input" id="upload-label">选择文件</label>
-          </div>
-          <button class="composer-submit" id="submit-text-btn" type="button">发送文本</button>
-        </div>
-      </div>
-      <div class="selected-file" id="selected-file"></div>
-    </section>
 
     <div class="toolbar">
       <div>
@@ -1155,7 +1058,7 @@
     <div class="content-grid" id="content-grid"></div>
 
     <footer class="app-footer">
-      Some Transfer <span id="app-version">v0.1.4</span>
+      Some Transfer <span id="app-version">v0.2.0</span>
     </footer>
   </div>
 

@@ -50,7 +50,7 @@ function getDefaultAppVersion() {
     return `v${minorVersionMatch[1]}.${minorVersionMatch[2]}`;
   }
 
-  return normalizeAppVersion(version) || 'v0.1.4';
+  return normalizeAppVersion(version) || 'v0.2.0';
 }
 
 const env = readString('NODE_ENV') || 'development';
