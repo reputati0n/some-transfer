@@ -339,8 +339,7 @@
     }
 
     .upload-label,
-    .composer-submit,
-    .file-download {
+    .composer-submit {
       display: inline-flex;
       align-items: center;
       justify-content: center;
@@ -520,7 +519,9 @@
 
     .expand-btn,
     .copy-btn,
-    .delete-btn {
+    .delete-btn,
+    .file-download,
+    .image-preview-btn {
       padding: 10px 14px;
       border-radius: 14px;
       font-size: 13px;
@@ -804,9 +805,15 @@
     }
 
     .file-download {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
       width: fit-content;
-      background: linear-gradient(135deg, #275f93 0%, #2d78bf 100%);
-      box-shadow: 0 10px 20px rgba(45, 120, 191, 0.16);
+      text-decoration: none;
+      white-space: nowrap;
+      background: rgba(45, 120, 191, 0.12);
+      color: var(--blue);
     }
 
     .file-actions {
@@ -819,14 +826,10 @@
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      min-height: 58px;
-      padding: 0 20px;
-      border-radius: 20px;
+      gap: 8px;
+      white-space: nowrap;
       background: rgba(204, 111, 57, 0.12);
       color: var(--accent-deep);
-      font-size: 15px;
-      font-weight: 600;
-      white-space: nowrap;
     }
 
     .item-time {
